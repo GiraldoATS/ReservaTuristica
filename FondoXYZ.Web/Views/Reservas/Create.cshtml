@@ -1,49 +1,238 @@
 ﻿@model FondoXYZ.Entities.Reserva
 
-<h2>Nueva Reserva</h2>
+<h2 class="mb-4">
+    Nueva Reserva
+</h2>
 
-<form asp-action="Create">
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
 
-    <div class="mb-3">
-        <label>Id Alojamiento</label>
+        @Html.ValidationSummary()
 
-        <input asp-for="IdAlojamiento"
-               class="form-control" />
     </div>
+}
 
-    <div class="mb-3">
-        <label>Fecha Inicio</label>
+<form asp-action="Create" method="post">
 
-        <input asp-for="FechaInicio"
-               type="date"
-               class="form-control" />
+    <input type="hidden"
+           asp-for="IdAlojamiento" />
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="mb-3">
+
+                <label class="form-label fw-bold">
+                    Alojamiento Seleccionado
+                </label>
+
+                <input value="@Model.IdAlojamiento"
+                       class="form-control"
+                       readonly />
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold">
+                        Fecha Inicio
+                    </label>
+
+                    <input asp-for="FechaInicio"
+                           type="date"
+                           class="form-control"
+                           id="fechaInicio" />
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold">
+                        Fecha Fin
+                    </label>
+
+                    <input asp-for="FechaFin"
+                           type="date"
+                           class="form-control"
+                           id="fechaFin" />
+
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label fw-bold">
+                    Número Personas
+                </label>
+
+                <input asp-for="NumeroPersonas"
+                       class="form-control"
+                       id="numeroPersonas"
+                       min="1"
+                       value="1" />
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Total
+                </label>
+
+                <input asp-for="Total"
+                       class="form-control bg-light"
+                       id="total"
+                       readonly />
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-success w-100">
+
+                Guardar Reserva
+
+            </button>
+
+        </div>
+
     </div>
-
-    <div class="mb-3">
-        <label>Fecha Fin</label>
-
-        <input asp-for="FechaFin"
-               type="date"
-               class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label>Número Personas</label>
-
-        <input asp-for="NumeroPersonas"
-               class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label>Total</label>
-
-        <input asp-for="Total"
-               class="form-control" />
-    </div>
-
-    <button type="submit"
-            class="btn btn-success">
-        Guardar
-    </button>
 
 </form>
+
+@section Scripts {
+
+    <script>
+
+        async function calcularTarifa() {
+
+            const idAlojamiento =
+                document.querySelector(
+                    '[name="IdAlojamiento"]'
+                ).value;
+
+            const fechaInicio =
+                document.getElementById(
+                    "fechaInicio"
+                ).value;
+
+            const fechaFin =
+                document.getElementById(
+                    "fechaFin"
+                ).value;
+
+            const numeroPersonas =
+                document.getElementById(
+                    "numeroPersonas"
+                ).value;
+
+            if (
+                !fechaInicio ||
+                !fechaFin ||
+                !numeroPersonas
+            ) {
+                return;
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        '/Reservas/CalcularTarifa',
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json'
+                            },
+
+                            body: JSON.stringify({
+
+                                idAlojamiento:
+                                    parseInt(
+                                        idAlojamiento
+                                    ),
+
+                                numeroPersonas:
+                                    parseInt(
+                                        numeroPersonas
+                                    ),
+
+                                fechaInicio:
+                                    fechaInicio,
+
+                                fechaFin:
+                                    fechaFin
+                            })
+                        });
+
+                const data =
+                    await response.json();
+
+                console.log(data);
+
+                // =========================
+                // VALIDAR ERROR
+                // =========================
+
+                if (data.error) {
+
+                    alert(data.error);
+
+                    document
+                        .getElementById("total")
+                        .value = "";
+
+                    return;
+                }
+
+                // =========================
+                // ASIGNAR TOTAL
+                // =========================
+
+                document
+                    .getElementById("total")
+                    .value =
+                        data.totalPagar;
+
+            }
+            catch {
+
+                alert(
+                    "Ocurrió un error calculando la tarifa"
+                );
+            }
+        }
+
+        document
+            .getElementById("fechaInicio")
+            .addEventListener(
+                "change",
+                calcularTarifa);
+
+        document
+            .getElementById("fechaFin")
+            .addEventListener(
+                "change",
+                calcularTarifa);
+
+        document
+            .getElementById("numeroPersonas")
+            .addEventListener(
+                "input",
+                calcularTarifa);
+
+        // =========================
+        // CALCULAR AUTOMÁTICO
+        // =========================
+
+        calcularTarifa();
+
+    </script>
+
+}

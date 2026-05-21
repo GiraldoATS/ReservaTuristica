@@ -1,35 +1,120 @@
 ﻿@model List<FondoXYZ.Entities.Reserva>
 
-<h2>Reservas</h2>
+<h2 class="mb-4">
+    Reservas
+</h2>
 
-<a asp-action="Create"
-   class="btn btn-primary mb-3">
-    Nueva Reserva
-</a>
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success">
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Fecha Inicio</th>
-            <th>Fecha Fin</th>
-            <th>Personas</th>
-            <th>Total</th>
-        </tr>
-    </thead>
+        @TempData["success"]
 
-    <tbody>
+    </div>
+}
 
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.IdReserva</td>
-                <td>@item.FechaInicio</td>
-                <td>@item.FechaFin</td>
-                <td>@item.NumeroPersonas</td>
-                <td>@item.Total</td>
-            </tr>
-        }
+<div class="mb-3">
 
-    </tbody>
-</table>
+    <a asp-action="Disponibilidad"
+       class="btn btn-primary">
+
+        Nueva Reserva
+
+    </a>
+
+</div>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-dark">
+
+                <tr>
+
+                    <th>Id</th>
+
+                    <th>Alojamiento</th>
+
+                    <th>Fecha Inicio</th>
+
+                    <th>Fecha Fin</th>
+
+                    <th>Personas</th>
+
+                    <th>Total</th>
+
+                    <th>Estado</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+
+                            <td>
+                                @item.IdReserva
+                            </td>
+
+                            <td>
+                                @item.Alojamiento?.Nombre
+                            </td>
+
+                            <td>
+                                @item.FechaInicio.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                @item.FechaFin.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                @item.NumeroPersonas
+                            </td>
+
+                            <td>
+                                @item.Total.ToString("C")
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-success">
+
+                                    @item.Estado
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+
+                        <td colspan="7"
+                            class="text-center">
+
+                            No existen reservas registradas.
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

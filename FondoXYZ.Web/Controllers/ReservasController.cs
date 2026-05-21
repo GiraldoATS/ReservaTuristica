@@ -19,6 +19,7 @@ namespace FondoXYZ.Web.Controllers
         // LISTAR RESERVAS
         // =========================
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var reservas =
@@ -30,30 +31,66 @@ namespace FondoXYZ.Web.Controllers
         // =========================
         // CREAR RESERVA
         // =========================
-
-        [HttpGet]
-        public IActionResult Create()
+        public IActionResult Create(
+            int id)
         {
-            return View();
+            var reserva = new Reserva
+            {
+                IdAlojamiento = id,
+                FechaInicio = DateTime.Today,
+                FechaFin = DateTime.Today.AddDays(1)
+            };
+
+            return View(reserva);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(
-            Reserva reserva)
+     Reserva reserva)
         {
-            if (!ModelState.IsValid)
+            try
             {
+                // =========================
+                // USUARIO TEMPORAL
+                // =========================
+
+                reserva.IdUsuario = "USUARIO_TEST";
+
+                // =========================
+                // LIMPIAR ERROR MVC
+                // =========================
+
+                ModelState.Remove("IdUsuario");
+
+                // =========================
+                // VALIDACIONES
+                // =========================
+
+                if (!ModelState.IsValid)
+                {
+                    return View(reserva);
+                }
+
+                // =========================
+                // GUARDAR
+                // =========================
+
+                await _service.CrearReserva(reserva);
+
+                TempData["success"] =
+                    "Reserva creada correctamente";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    ex.Message);
+
                 return View(reserva);
             }
-
-            await _service.CrearReserva(reserva);
-
-            TempData["success"] =
-                "Reserva creada correctamente";
-
-            return RedirectToAction(nameof(Index));
         }
-
         // =========================
         // CONSULTAR DISPONIBILIDAD
         // =========================
@@ -78,6 +115,34 @@ namespace FondoXYZ.Web.Controllers
                         fechaFin);
 
             return View(resultado);
+        }
+
+        // =========================
+        // CALCULAR TARIFA
+        // =========================
+
+        [HttpPost]
+        public async Task<JsonResult> CalcularTarifa(
+    [FromBody] CalcularTarifaRequest request)
+        {
+            try
+            {
+                var resultado =
+                    await _service.CalcularTarifa(
+                        request.IdAlojamiento,
+                        request.NumeroPersonas,
+                        request.FechaInicio,
+                        request.FechaFin);
+
+                return Json(resultado);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    error = ex.Message
+                });
+            }
         }
     }
 }

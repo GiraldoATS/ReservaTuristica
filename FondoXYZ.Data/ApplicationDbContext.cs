@@ -23,12 +23,28 @@ namespace FondoXYZ.Data
 
         public DbSet<Temporada> Temporadas { get; set; }
         public DbSet<DisponibilidadDto> Disponibilidades { get; set; }
+        public DbSet<CalculoTarifaDto> CalculoTarifas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<DisponibilidadDto>()
                 .HasNoKey();
+
+            modelBuilder.Entity<CalculoTarifaDto>()
+                 .HasNoKey();
+
+            modelBuilder.Entity<CalculoTarifaDto>()
+                .Property(x => x.PrecioBase)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CalculoTarifaDto>()
+                .Property(x => x.PrecioPersonaAdicional)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CalculoTarifaDto>()
+                .Property(x => x.TotalPagar)
+                .HasPrecision(18, 2);
 
             // =========================
             // SEDES
@@ -73,12 +89,24 @@ namespace FondoXYZ.Data
                 .HasKey(x => x.IdTarifa);
 
             modelBuilder.Entity<Tarifa>()
-                .Property(x => x.PrecioBase)
-                .HasPrecision(18, 2);
+            .Property(x => x.PrecioBase)
+            .HasPrecision(18, 2);
 
             modelBuilder.Entity<Tarifa>()
                 .Property(x => x.PrecioPersonaAdicional)
                 .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Tarifa>()
+                .HasOne(x => x.Alojamiento)
+                .WithMany()
+                .HasForeignKey(x => x.IdAlojamiento)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Tarifa>()
+                .HasOne(x => x.Temporada)
+                .WithMany()
+                .HasForeignKey(x => x.IdTemporada)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // =========================
             // TEMPORADAS

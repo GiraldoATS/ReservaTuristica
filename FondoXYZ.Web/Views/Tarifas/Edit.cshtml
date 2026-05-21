@@ -1,0 +1,91 @@
+﻿@model FondoXYZ.Entities.Tarifa
+
+<h2 class="mb-4">
+    Editar Tarifa
+</h2>
+
+<div asp-validation-summary="All"
+     class="alert alert-danger">
+</div>
+
+<form asp-action="Edit"
+      method="post">
+
+    <input type="hidden"
+           asp-for="IdTarifa" />
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="mb-3">
+
+                <label class="form-label fw-bold">
+                    Alojamiento
+                </label>
+
+                <select asp-for="IdAlojamiento"
+                        asp-items="ViewBag.Alojamientos"
+                        class="form-select">
+                </select>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label fw-bold">
+                    Temporada
+                </label>
+
+                <select asp-for="IdTemporada"
+                        asp-items="ViewBag.Temporadas"
+                        class="form-select">
+                </select>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label fw-bold">
+                    Precio Base
+                </label>
+
+                <input asp-for="PrecioBase"
+                       class="form-control" />
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label fw-bold">
+                    Precio Persona Adicional
+                </label>
+
+                <input asp-for="PrecioPersonaAdicional"
+                       class="form-control" />
+
+            </div>
+
+            <div class="form-check mb-4">
+
+                <input asp-for="Estado"
+                       class="form-check-input" />
+
+                <label class="form-check-label">
+                    Activa
+                </label>
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-warning w-100">
+
+                Actualizar Tarifa
+
+            </button>
+
+        </div>
+
+    </div>
+
+</form>

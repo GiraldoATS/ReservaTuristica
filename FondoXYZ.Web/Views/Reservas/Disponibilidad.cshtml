@@ -7,25 +7,31 @@
     <div class="row">
 
         <div class="col-md-4">
+
             <label>Fecha Inicio</label>
 
             <input type="date"
                    name="fechaInicio"
                    class="form-control" />
+
         </div>
 
         <div class="col-md-4">
+
             <label>Fecha Fin</label>
 
             <input type="date"
                    name="fechaFin"
                    class="form-control" />
+
         </div>
 
         <div class="col-md-4 mt-4">
+
             <button class="btn btn-primary">
                 Consultar
             </button>
+
         </div>
 
     </div>
@@ -34,17 +40,26 @@
 
 <hr />
 
-@if (Model != null)
+@if (Model != null && Model.Any())
 {
-    <table class="table table-bordered">
+    <table class="table table-bordered table-hover">
 
-        <thead>
+        <thead class="table-dark">
+
             <tr>
+
                 <th>Sede</th>
+
                 <th>Alojamiento</th>
+
                 <th>Capacidad</th>
+
                 <th>Tipo</th>
+
+                <th>Acción</th>
+
             </tr>
+
         </thead>
 
         <tbody>
@@ -52,14 +67,40 @@
             @foreach (var item in Model)
             {
                 <tr>
+
                     <td>@item.Sede</td>
+
                     <td>@item.Alojamiento</td>
+
                     <td>@item.CapacidadMaxima</td>
+
                     <td>@item.Tipo</td>
+
+                    <td>
+
+                        <a asp-action="Create"
+                           asp-route-id="@item.IdAlojamiento"
+                           class="btn btn-success">
+
+                            Reservar
+
+                        </a>
+
+                    </td>
+
                 </tr>
             }
 
         </tbody>
 
     </table>
+}
+else
+{
+    <div class="alert alert-warning">
+
+        No hay alojamientos disponibles
+        para las fechas seleccionadas.
+
+    </div>
 }

@@ -1,0 +1,117 @@
+﻿@model List<FondoXYZ.Entities.Tarifa>
+
+<h2 class="mb-4">
+    Gestión de Tarifas
+</h2>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["success"]
+    </div>
+}
+
+<a asp-action="Create"
+   class="btn btn-primary mb-3">
+
+    Nueva Tarifa
+
+</a>
+
+<table class="table table-bordered table-hover">
+
+    <thead class="table-dark">
+
+        <tr>
+
+            <th>Id</th>
+
+            <th>Alojamiento</th>
+
+            <th>Temporada</th>
+
+            <th>Precio Base</th>
+
+            <th>Precio Persona Adicional</th>
+
+            <th>Estado</th>
+
+            <th>Acciones</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>@item.IdTarifa</td>
+
+                <td>
+                    @item.Alojamiento?.Nombre
+                </td>
+
+                <td>
+                    @item.Temporada?.Nombre
+                </td>
+
+                <td>
+                    @item.PrecioBase.ToString("C")
+                </td>
+
+                <td>
+                    @item.PrecioPersonaAdicional.ToString("C")
+                </td>
+
+                <td>
+
+                    @if (item.Estado)
+                    {
+                        <span class="badge bg-success">
+                            Activa
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            Inactiva
+                        </span>
+                    }
+
+                </td>
+
+                <td>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@item.IdTarifa"
+                       class="btn btn-warning btn-sm">
+
+                        Editar
+
+                    </a>
+
+                    <form asp-action="Delete"
+                          asp-route-id="@item.IdTarifa"
+                          method="post"
+                          class="d-inline">
+
+                        <button type="submit"
+                                class="btn btn-danger btn-sm">
+
+                            Eliminar
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>

@@ -32,6 +32,42 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IReservaService,
     ReservaService>();
+builder.Services
+    .AddScoped<
+        ITarifaRepository,
+        TarifaRepository>();
+
+builder.Services
+    .AddScoped<
+        ITarifaService,
+        TarifaService>();
+
+builder.Services
+    .AddScoped<
+        ITemporadaRepository,
+        TemporadaRepository>();
+
+builder.Services
+    .AddScoped<
+        ITemporadaService,
+        TemporadaService>();
+builder.Services
+    .AddScoped<
+        IAlojamientoRepository,
+        AlojamientoRepository>();
+
+builder.Services
+    .AddScoped<
+        IAlojamientoService,
+        AlojamientoService>();
+
+builder.Services.AddScoped<
+    IDashboardRepository,
+    DashboardRepository>();
+
+builder.Services.AddScoped<
+    IDashboardService,
+    DashboardService>();
 
 var app = builder.Build();
 

@@ -61,6 +61,52 @@ namespace FondoXYZ.Data.Migrations
                     b.ToTable("Alojamientos");
                 });
 
+            modelBuilder.Entity("FondoXYZ.Entities.DTOs.CalculoTarifaDto", b =>
+                {
+                    b.Property<int>("IdTemporada")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumeroNoches")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonasAdicionales")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioBase")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PrecioPersonaAdicional")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPagar")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.ToTable("CalculoTarifas");
+                });
+
+            modelBuilder.Entity("FondoXYZ.Entities.DTOs.DisponibilidadDto", b =>
+                {
+                    b.Property<string>("Alojamiento")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CapacidadMaxima")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdAlojamiento")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Sede")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("Disponibilidades");
+                });
+
             modelBuilder.Entity("FondoXYZ.Entities.Reserva", b =>
                 {
                     b.Property<int>("IdReserva")
@@ -164,6 +210,10 @@ namespace FondoXYZ.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("IdTarifa");
+
+                    b.HasIndex("IdAlojamiento");
+
+                    b.HasIndex("IdTemporada");
 
                     b.ToTable("Tarifas");
                 });
@@ -416,6 +466,25 @@ namespace FondoXYZ.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Alojamiento");
+                });
+
+            modelBuilder.Entity("FondoXYZ.Entities.Tarifa", b =>
+                {
+                    b.HasOne("FondoXYZ.Entities.Alojamiento", "Alojamiento")
+                        .WithMany()
+                        .HasForeignKey("IdAlojamiento")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FondoXYZ.Entities.Temporada", "Temporada")
+                        .WithMany()
+                        .HasForeignKey("IdTemporada")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Alojamiento");
+
+                    b.Navigation("Temporada");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
