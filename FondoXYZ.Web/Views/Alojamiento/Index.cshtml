@@ -1,0 +1,52 @@
+﻿@model List<FondoXYZ.Entities.Alojamiento>
+
+<h2>Alojamientos</h2>
+
+<a asp-action="Create"
+   class="btn btn-primary mb-3">
+    Nuevo
+</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Sede</th>
+            <th>Capacidad</th>
+            <th>Habitaciones</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Nombre</td>
+                <td>@item.Tipo</td>
+                <td>@item.Sede?.Nombre</td>
+                <td>@item.CapacidadMaxima</td>
+                <td>@item.CantidadHabitaciones</td>
+                <td>
+                    @(item.Estado ? "Activo" : "Inactivo")
+                </td>
+
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@item.IdAlojamiento"
+                       class="btn btn-warning">
+                        Editar
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@item.IdAlojamiento"
+                       class="btn btn-danger">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

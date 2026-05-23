@@ -1,0 +1,53 @@
+﻿@model FondoXYZ.Entities.DTOs.LoginDto
+
+<h2>Iniciar Sesión</h2>
+
+<div asp-validation-summary="All"
+     class="text-danger">
+</div>
+
+<form asp-action="Login" method="post">
+
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label>Email</label>
+
+        <input asp-for="Email"
+               class="form-control" />
+
+        <span asp-validation-for="Email"
+              class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Contraseña</label>
+
+        <input asp-for="Password"
+               type="password"
+               class="form-control" />
+
+        <span asp-validation-for="Password"
+              class="text-danger"></span>
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        Ingresar
+    </button>
+
+    <a asp-action="Register"
+       class="btn btn-secondary">
+        Registrarse
+    </a>
+
+    <a asp-action="ForgotPassword"
+       class="btn btn-link">
+        ¿Olvidaste tu contraseña?
+    </a>
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

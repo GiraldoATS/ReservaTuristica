@@ -1,0 +1,21 @@
+﻿@model FondoXYZ.Entities.Sede
+
+<h2>Nueva Sede</h2>
+
+<form asp-action="Create">
+
+    <div class="mb-3">
+
+        <label>Nombre</label>
+
+        <input asp-for="Nombre"
+               class="form-control" />
+
+    </div>
+
+    <button type="submit"
+            class="btn btn-success">
+        Guardar
+    </button>
+
+</form>

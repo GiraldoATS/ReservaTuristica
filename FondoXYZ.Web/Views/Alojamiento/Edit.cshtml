@@ -1,0 +1,121 @@
+﻿@model FondoXYZ.Entities.Alojamiento
+
+<h2>Editar Alojamiento</h2>
+
+<form asp-action="Edit">
+
+    <input type="hidden"
+           asp-for="IdAlojamiento" />
+
+    <div class="mb-3">
+        <label class="form-label">
+            Nombre
+        </label>
+
+        <input asp-for="Nombre"
+               class="form-control" />
+
+        <span asp-validation-for="Nombre"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Tipo
+        </label>
+
+        <input asp-for="Tipo"
+               class="form-control" />
+
+        <span asp-validation-for="Tipo"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Sede
+        </label>
+
+        <select asp-for="IdSede"
+                asp-items="ViewBag.Sedes"
+                class="form-select">
+        </select>
+
+        <span asp-validation-for="IdSede"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Capacidad Máxima
+        </label>
+
+        <input asp-for="CapacidadMaxima"
+               class="form-control" />
+
+        <span asp-validation-for="CapacidadMaxima"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Cantidad Habitaciones
+        </label>
+
+        <input asp-for="CantidadHabitaciones"
+               class="form-control" />
+
+        <span asp-validation-for="CantidadHabitaciones"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Descripción
+        </label>
+
+        <textarea asp-for="Descripcion"
+                  class="form-control"
+                  rows="4">
+        </textarea>
+
+        <span asp-validation-for="Descripcion"
+              class="text-danger">
+        </span>
+    </div>
+
+    <!-- ESTADO -->
+    <div class="form-check mb-3">
+
+        <input asp-for="Estado"
+               class="form-check-input" />
+
+        <label asp-for="Estado"
+               class="form-check-label">
+            Activo
+        </label>
+
+    </div>
+
+    <button type="submit"
+            class="btn btn-warning">
+        Actualizar
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Volver
+    </a>
+
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

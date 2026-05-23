@@ -1,8 +1,10 @@
 ﻿using FondoXYZ.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FondoXYZ.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class DashboardController
         : Controller
     {

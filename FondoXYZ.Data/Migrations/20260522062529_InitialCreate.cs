@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FondoXYZ.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,6 +30,7 @@ namespace FondoXYZ.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    NombreCompleto = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -51,23 +52,32 @@ namespace FondoXYZ.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Reservas",
+                name: "CalculoTarifas",
                 columns: table => new
                 {
-                    IdReserva = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdUsuario = table.Column<int>(type: "int", nullable: false),
-                    IdAlojamiento = table.Column<int>(type: "int", nullable: false),
-                    FechaInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FechaFin = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NumeroPersonas = table.Column<int>(type: "int", nullable: false),
-                    Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FechaReserva = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IdTemporada = table.Column<int>(type: "int", nullable: false),
+                    PrecioBase = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    PrecioPersonaAdicional = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    NumeroNoches = table.Column<int>(type: "int", nullable: false),
+                    PersonasAdicionales = table.Column<int>(type: "int", nullable: false),
+                    TotalPagar = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Reservas", x => x.IdReserva);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Disponibilidades",
+                columns: table => new
+                {
+                    IdAlojamiento = table.Column<int>(type: "int", nullable: false),
+                    Sede = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Alojamiento = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CapacidadMaxima = table.Column<int>(type: "int", nullable: false),
+                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
                 });
 
             migrationBuilder.CreateTable(
@@ -76,7 +86,7 @@ namespace FondoXYZ.Data.Migrations
                 {
                     IdSede = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Ciudad = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -89,29 +99,12 @@ namespace FondoXYZ.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tarifas",
-                columns: table => new
-                {
-                    IdTarifa = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdAlojamiento = table.Column<int>(type: "int", nullable: false),
-                    IdTemporada = table.Column<int>(type: "int", nullable: false),
-                    PrecioBase = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PrecioPersonaAdicional = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Estado = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tarifas", x => x.IdTarifa);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Temporadas",
                 columns: table => new
                 {
                     IdTemporada = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     FechaInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FechaFin = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Estado = table.Column<bool>(type: "bit", nullable: false)
@@ -167,8 +160,8 @@ namespace FondoXYZ.Data.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
@@ -212,8 +205,8 @@ namespace FondoXYZ.Data.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -234,28 +227,89 @@ namespace FondoXYZ.Data.Migrations
                     IdAlojamiento = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdSede = table.Column<int>(type: "int", nullable: false),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CapacidadMaxima = table.Column<int>(type: "int", nullable: false),
                     CantidadHabitaciones = table.Column<int>(type: "int", nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Estado = table.Column<bool>(type: "bit", nullable: false),
-                    SedeIdSede = table.Column<int>(type: "int", nullable: true)
+                    Estado = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Alojamientos", x => x.IdAlojamiento);
                     table.ForeignKey(
-                        name: "FK_Alojamientos_Sedes_SedeIdSede",
-                        column: x => x.SedeIdSede,
+                        name: "FK_Alojamientos_Sedes_IdSede",
+                        column: x => x.IdSede,
                         principalTable: "Sedes",
-                        principalColumn: "IdSede");
+                        principalColumn: "IdSede",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reservas",
+                columns: table => new
+                {
+                    IdReserva = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdUsuario = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IdAlojamiento = table.Column<int>(type: "int", nullable: false),
+                    FechaInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FechaFin = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NumeroPersonas = table.Column<int>(type: "int", nullable: false),
+                    Total = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FechaReserva = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reservas", x => x.IdReserva);
+                    table.ForeignKey(
+                        name: "FK_Reservas_Alojamientos_IdAlojamiento",
+                        column: x => x.IdAlojamiento,
+                        principalTable: "Alojamientos",
+                        principalColumn: "IdAlojamiento",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Reservas_AspNetUsers_IdUsuario",
+                        column: x => x.IdUsuario,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tarifas",
+                columns: table => new
+                {
+                    IdTarifa = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdAlojamiento = table.Column<int>(type: "int", nullable: false),
+                    IdTemporada = table.Column<int>(type: "int", nullable: false),
+                    PrecioBase = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    PrecioPersonaAdicional = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Estado = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tarifas", x => x.IdTarifa);
+                    table.ForeignKey(
+                        name: "FK_Tarifas_Alojamientos_IdAlojamiento",
+                        column: x => x.IdAlojamiento,
+                        principalTable: "Alojamientos",
+                        principalColumn: "IdAlojamiento",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Tarifas_Temporadas_IdTemporada",
+                        column: x => x.IdTemporada,
+                        principalTable: "Temporadas",
+                        principalColumn: "IdTemporada",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Alojamientos_SedeIdSede",
+                name: "IX_Alojamientos_IdSede",
                 table: "Alojamientos",
-                column: "SedeIdSede");
+                column: "IdSede");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -295,14 +349,31 @@ namespace FondoXYZ.Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservas_IdAlojamiento",
+                table: "Reservas",
+                column: "IdAlojamiento");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservas_IdUsuario",
+                table: "Reservas",
+                column: "IdUsuario");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tarifas_IdAlojamiento",
+                table: "Tarifas",
+                column: "IdAlojamiento");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tarifas_IdTemporada",
+                table: "Tarifas",
+                column: "IdTemporada");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Alojamientos");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -319,22 +390,31 @@ namespace FondoXYZ.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "CalculoTarifas");
+
+            migrationBuilder.DropTable(
+                name: "Disponibilidades");
+
+            migrationBuilder.DropTable(
                 name: "Reservas");
 
             migrationBuilder.DropTable(
                 name: "Tarifas");
 
             migrationBuilder.DropTable(
-                name: "Temporadas");
-
-            migrationBuilder.DropTable(
-                name: "Sedes");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Alojamientos");
+
+            migrationBuilder.DropTable(
+                name: "Temporadas");
+
+            migrationBuilder.DropTable(
+                name: "Sedes");
         }
     }
 }

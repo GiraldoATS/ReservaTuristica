@@ -1,104 +1,200 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
+
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FondoXYZ.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FondoXYZ.Web.styles.css" asp-append-version="true" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - FondoXYZ
+    </title>
+
+    <!-- BOOTSTRAP -->
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- SITE CSS -->
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/FondoXYZ.Web.styles.css"
+          asp-append-version="true" />
+
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FondoXYZ.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
 
-                        <li class="nav-item">
+<body class="bg-light">
 
-                            <a class="nav-link text-dark"
-                               asp-controller="Home"
-                               asp-action="Index">
+    <!-- ========================= -->
+    <!-- NAVBAR -->
+    <!-- ========================= -->
+    @if (User.Identity!.IsAuthenticated)
+    {
+        <header>
 
-                                Inicio
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
 
-                            </a>
+                <div class="container">
 
-                        </li>
+                    <!-- LOGO -->
 
-                        <li class="nav-item">
+                    <a class="navbar-brand fw-bold text-primary"
+                       asp-controller="Home"
+                       asp-action="Index">
 
-                            <a class="nav-link text-dark"
-                               asp-controller="Reservas"
-                               asp-action="Index">
+                        FondoXYZ
 
-                                Reservas
+                    </a>
 
-                            </a>
+                    <!-- MOBILE -->
 
-                        </li>
+                    <button class="navbar-toggler"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#navbarContent">
 
-                        <li class="nav-item">
+                        <span class="navbar-toggler-icon"></span>
 
-                            <a class="nav-link text-dark"
-                               asp-controller="Reservas"
-                               asp-action="Disponibilidad">
+                    </button>
 
-                                Disponibilidad
+                    <!-- MENU -->
 
-                            </a>
+                    <div class="collapse navbar-collapse"
+                         id="navbarContent">
 
-                        </li>
+                        <!-- LEFT -->
 
-                        <li class="nav-item">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                            <a class="nav-link text-dark"
-                               asp-controller="Tarifas"
-                               asp-action="Index">
+                            <!-- TODOS -->
 
-                                Tarifas
+                            <li class="nav-item">
 
-                            </a>
+                                <a class="nav-link"
+                                   asp-controller="Home"
+                                   asp-action="Index">
 
-                        </li>
-                        <li class="nav-item">
+                                    Inicio
 
-                            <a class="nav-link text-dark"
-                               asp-controller="Dashboard"
-                               asp-action="Index">
+                                </a>
 
-                                Dashboard
+                            </li>
 
-                            </a>
+                            <li class="nav-item">
 
-                        </li>
+                                <a class="nav-link"
+                                   asp-controller="Reservas"
+                                   asp-action="Index">
 
-                    </ul>
-                    <partial name="_LoginPartial" />
+                                    Reservas
+
+                                </a>
+
+                            </li>
+
+                            <!-- SOLO ADMIN -->
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+
+                                    <a class="nav-link"
+                                       asp-controller="Tarifas"
+                                       asp-action="Index">
+
+                                        Tarifas
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item">
+
+                                    <a class="nav-link"
+                                       asp-controller="Dashboard"
+                                       asp-action="Index">
+
+                                        Dashboard
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item">
+
+                                    <a class="nav-link"
+                                       asp-controller="Alojamiento"
+                                       asp-action="Index">
+
+                                        Alojamientos
+
+                                    </a>
+
+                                </li>
+
+                                <li class="nav-item">
+
+                                    <a class="nav-link"
+                                       asp-controller="Sedes"
+                                       asp-action="Index">
+
+                                        Sedes
+
+                                    </a>
+
+                                </li>
+                            }
+
+                        </ul>
+
+                        <!-- LOGIN PARTIAL -->
+
+                        <partial name="_LoginPartial" />
+
+                    </div>
+
                 </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+            </nav>
+
+        </header>
+    }
+
+    <!-- ========================= -->
+    <!-- CONTENT -->
+    <!-- ========================= -->
+
+    <div class="container mt-4">
+
+        <main role="main"
+              class="pb-3">
+
             @RenderBody()
+
         </main>
+
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - FondoXYZ.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    <!-- ========================= -->
+    <!-- SCRIPTS -->
+    <!-- ========================= -->
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+    @await RenderSectionAsync(
+    "Scripts",
+        required: false)
+
 </body>
+
 </html>

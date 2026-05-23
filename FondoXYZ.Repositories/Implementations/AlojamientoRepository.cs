@@ -20,14 +20,41 @@ namespace FondoXYZ.Repositories.Implementations
             ObtenerAlojamientos()
         {
             return await _context.Alojamientos
-                .ToListAsync();
+                 .Include(x => x.Sede)
+                 .ToListAsync();
         }
         public async Task<Alojamiento?>
-            ObtenerPorId(int id)
+          ObtenerPorId(int id)
         {
             return await _context.Alojamientos
                 .FirstOrDefaultAsync(x =>
                     x.IdAlojamiento == id);
+        }
+        public async Task Crear(Alojamiento alojamiento)
+        {
+            _context.Alojamientos.Add(alojamiento);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Actualizar(Alojamiento alojamiento)
+        {
+            _context.Alojamientos.Update(alojamiento);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Eliminar(int id)
+        {
+            var alojamiento = await _context.Alojamientos
+                .FirstOrDefaultAsync(x => x.IdAlojamiento == id);
+
+            if (alojamiento != null)
+            {
+                _context.Alojamientos.Remove(alojamiento);
+
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
