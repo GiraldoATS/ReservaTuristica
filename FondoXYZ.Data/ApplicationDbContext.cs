@@ -14,10 +14,9 @@ namespace FondoXYZ.Data
         {
         }
 
-        // =========================
-        // TABLAS
-        // =========================
+        #region DbSets
 
+        // Entidades
         public DbSet<Sede> Sedes { get; set; }
 
         public DbSet<Alojamiento> Alojamientos { get; set; }
@@ -28,31 +27,35 @@ namespace FondoXYZ.Data
 
         public DbSet<Temporada> Temporadas { get; set; }
 
-        // =========================
-        // DTOs PARA STORED PROCEDURES
-        // =========================
-
+        // DTOs
         public DbSet<DisponibilidadDto> Disponibilidades { get; set; }
 
         public DbSet<CalculoTarifaDto> CalculoTarifas { get; set; }
+
+        #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // =========================
-            // DTOs SIN PRIMARY KEY
-            // =========================
+            ConfigureDtos(modelBuilder);
+            ConfigureSede(modelBuilder);
+            ConfigureAlojamiento(modelBuilder);
+            ConfigureReserva(modelBuilder);
+            ConfigureTarifa(modelBuilder);
+            ConfigureTemporada(modelBuilder);
+            ConfigureIdentity(modelBuilder);
+        }
 
+        #region Configurations
+
+        private static void ConfigureDtos(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<DisponibilidadDto>()
                 .HasNoKey();
 
             modelBuilder.Entity<CalculoTarifaDto>()
                 .HasNoKey();
-
-            // =========================
-            // PRECISION DECIMAL DTOs
-            // =========================
 
             modelBuilder.Entity<CalculoTarifaDto>()
                 .Property(x => x.PrecioBase)
@@ -65,11 +68,10 @@ namespace FondoXYZ.Data
             modelBuilder.Entity<CalculoTarifaDto>()
                 .Property(x => x.TotalPagar)
                 .HasPrecision(18, 2);
+        }
 
-            // =========================
-            // SEDES
-            // =========================
-
+        private static void ConfigureSede(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Sede>()
                 .HasKey(x => x.IdSede);
 
@@ -77,11 +79,10 @@ namespace FondoXYZ.Data
                 .Property(x => x.Nombre)
                 .IsRequired()
                 .HasMaxLength(150);
+        }
 
-            // =========================
-            // ALOJAMIENTOS
-            // =========================
-
+        private static void ConfigureAlojamiento(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Alojamiento>()
                 .HasKey(x => x.IdAlojamiento);
 
@@ -95,10 +96,10 @@ namespace FondoXYZ.Data
                 .WithMany(x => x.Alojamientos)
                 .HasForeignKey(x => x.IdSede)
                 .OnDelete(DeleteBehavior.Cascade);
-            // =========================
-            // RESERVAS
-            // =========================
+        }
 
+        private static void ConfigureReserva(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Reserva>()
                 .HasKey(x => x.IdReserva);
 
@@ -117,11 +118,10 @@ namespace FondoXYZ.Data
                 .WithMany()
                 .HasForeignKey(x => x.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
+        }
 
-            // =========================
-            // TARIFAS
-            // =========================
-
+        private static void ConfigureTarifa(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Tarifa>()
                 .HasKey(x => x.IdTarifa);
 
@@ -144,11 +144,10 @@ namespace FondoXYZ.Data
                 .WithMany()
                 .HasForeignKey(x => x.IdTemporada)
                 .OnDelete(DeleteBehavior.Restrict);
+        }
 
-            // =========================
-            // TEMPORADAS
-            // =========================
-
+        private static void ConfigureTemporada(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Temporada>()
                 .HasKey(x => x.IdTemporada);
 
@@ -156,14 +155,15 @@ namespace FondoXYZ.Data
                 .Property(x => x.Nombre)
                 .IsRequired()
                 .HasMaxLength(100);
+        }
 
-            // =========================
-            // TABLAS IDENTITY
-            // =========================
-
+        private static void ConfigureIdentity(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<ApplicationUser>()
                 .Property(x => x.NombreCompleto)
                 .HasMaxLength(150);
         }
+
+        #endregion
     }
 }

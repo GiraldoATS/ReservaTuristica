@@ -22,9 +22,7 @@ namespace FondoXYZ.Services.Implementations
                 alojamientoRepository;
         }
 
-        // =========================
-        // OBTENER RESERVAS
-        // =========================
+        #region Reservas
 
         public async Task<List<Reserva>>
             ObtenerReservas()
@@ -33,78 +31,30 @@ namespace FondoXYZ.Services.Implementations
                 .ObtenerReservas();
         }
 
-        // =========================
-        // CREAR RESERVA
-        // =========================
-
         public async Task CrearReserva(
             Reserva reserva)
         {
-            // =========================
-            // VALIDAR FECHAS
-            // =========================
+            ValidarFechas(
+                reserva.FechaInicio,
+                reserva.FechaFin);
 
-            if (reserva.FechaFin <=
-                reserva.FechaInicio)
-            {
-                throw new Exception(
-                    "La fecha final debe ser mayor");
-            }
-
-            // =========================
-            // VALIDAR CRUCE
-            // =========================
-
-            bool existeCruce =
-                await _repository
-                    .ExisteCruceReserva(
-                        reserva.IdAlojamiento,
-                        reserva.FechaInicio,
-                        reserva.FechaFin);
-
-            if (existeCruce)
-            {
-                throw new Exception(
-                    "Ya existe una reserva para este alojamiento en las fechas seleccionadas");
-            }
-
-            // =========================
-            // VALIDAR ALOJAMIENTO
-            // =========================
+            await ValidarCruceReserva(reserva);
 
             var alojamiento =
-                await _alojamientoRepository
-                    .ObtenerPorId(
-                        reserva.IdAlojamiento);
+                await ValidarAlojamiento(
+                    reserva.IdAlojamiento);
 
-            if (alojamiento == null)
-            {
-                throw new Exception(
-                    "El alojamiento no existe");
-            }
-
-            // =========================
-            // VALIDAR CAPACIDAD
-            // =========================
-
-            if (reserva.NumeroPersonas >
-                alojamiento.CapacidadMaxima)
-            {
-                throw new Exception(
-                    $"La capacidad máxima es de {alojamiento.CapacidadMaxima} personas");
-            }
-
-            // =========================
-            // GUARDAR
-            // =========================
+            ValidarCapacidad(
+                reserva.NumeroPersonas,
+                alojamiento.CapacidadMaxima);
 
             await _repository
                 .CrearReserva(reserva);
         }
 
-        // =========================
-        // CONSULTAR DISPONIBILIDAD
-        // =========================
+        #endregion
+
+        #region Disponibilidad
 
         public async Task<List<DisponibilidadDto>>
             ConsultarDisponibilidad(
@@ -117,9 +67,9 @@ namespace FondoXYZ.Services.Implementations
                     fechaFin);
         }
 
-        // =========================
-        // CALCULAR TARIFA
-        // =========================
+        #endregion
+
+        #region Tarifas
 
         public async Task<CalculoTarifaDto>
             CalcularTarifa(
@@ -128,11 +78,9 @@ namespace FondoXYZ.Services.Implementations
                 DateTime fechaInicio,
                 DateTime fechaFin)
         {
-            if (fechaFin <= fechaInicio)
-            {
-                throw new Exception(
-                    "La fecha final debe ser mayor");
-            }
+            ValidarFechas(
+                fechaInicio,
+                fechaFin);
 
             return await _repository
                 .CalcularTarifa(
@@ -141,5 +89,67 @@ namespace FondoXYZ.Services.Implementations
                     fechaInicio,
                     fechaFin);
         }
+
+        #endregion
+
+        #region Validaciones
+
+        private static void ValidarFechas(
+            DateTime fechaInicio,
+            DateTime fechaFin)
+        {
+            if (fechaFin <= fechaInicio)
+            {
+                throw new Exception(
+                    "La fecha final debe ser mayor");
+            }
+        }
+
+        private async Task ValidarCruceReserva(
+            Reserva reserva)
+        {
+            bool existeCruce =
+                await _repository
+                    .ExisteCruceReserva(
+                        reserva.IdAlojamiento,
+                        reserva.FechaInicio,
+                        reserva.FechaFin);
+
+            if (existeCruce)
+            {
+                throw new Exception(
+                    "Ya existe una reserva para este alojamiento en las fechas seleccionadas");
+            }
+        }
+
+        private async Task<Alojamiento>
+            ValidarAlojamiento(
+                int idAlojamiento)
+        {
+            var alojamiento =
+                await _alojamientoRepository
+                    .ObtenerPorId(idAlojamiento);
+
+            if (alojamiento == null)
+            {
+                throw new Exception(
+                    "El alojamiento no existe");
+            }
+
+            return alojamiento;
+        }
+
+        private static void ValidarCapacidad(
+            int numeroPersonas,
+            int capacidadMaxima)
+        {
+            if (numeroPersonas > capacidadMaxima)
+            {
+                throw new Exception(
+                    $"La capacidad máxima es de {capacidadMaxima} personas");
+            }
+        }
+
+        #endregion
     }
 }

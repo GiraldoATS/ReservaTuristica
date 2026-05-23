@@ -17,19 +17,15 @@
 
     @Html.AntiForgeryToken()
 
-    <!-- ID ALOJAMIENTO -->
     <input type="hidden"
            asp-for="IdAlojamiento" />
 
-    <!-- TOTAL -->
     <input type="hidden"
            asp-for="Total" />
 
     <div class="card shadow-sm">
 
         <div class="card-body">
-
-            <!-- ALOJAMIENTO -->
 
             <div class="mb-3">
 
@@ -42,8 +38,6 @@
                        readonly />
 
             </div>
-
-            <!-- FECHAS -->
 
             <div class="row">
 
@@ -83,8 +77,6 @@
 
             </div>
 
-            <!-- PERSONAS -->
-
             <div class="mb-3">
 
                 <label class="form-label fw-bold">
@@ -107,8 +99,6 @@
 
             </div>
 
-            <!-- TOTAL -->
-
             <div class="mb-4">
 
                 <label class="form-label fw-bold">
@@ -120,8 +110,6 @@
                        readonly />
 
             </div>
-
-            <!-- BOTON -->
 
             <button type="submit"
                     class="btn btn-success w-100"
@@ -175,8 +163,6 @@
 
             try {
 
-                console.log("CALCULANDO TARIFA...");
-
                 const response =
                     await fetch(
                         '/Reservas/CalcularTarifa',
@@ -211,11 +197,6 @@
                 const data =
                     await response.json();
 
-                console.log(
-                    "RESPUESTA TARIFA:",
-                    data
-                );
-
                 if (data.error) {
 
                     alert(data.error);
@@ -223,13 +204,11 @@
                     return;
                 }
 
-                // INPUT OCULTO
                 document.querySelector(
                     '[name="Total"]'
                 ).value =
                     data.totalPagar;
 
-                // INPUT VISUAL
                 document.getElementById(
                     "totalVisual"
                 ).value =
@@ -250,8 +229,6 @@
                 );
             }
         }
-
-        // EVENTOS
 
         document
             .getElementById("fechaInicio")

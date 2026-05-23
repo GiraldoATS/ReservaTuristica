@@ -15,9 +15,7 @@ namespace FondoXYZ.Services.Implementations
             _repository = repository;
         }
 
-        // =========================
-        // OBTENER TODOS
-        // =========================
+        #region Alojamiento
 
         public async Task<List<Alojamiento>>
             ObtenerAlojamientos()
@@ -26,20 +24,12 @@ namespace FondoXYZ.Services.Implementations
                 .ObtenerAlojamientos();
         }
 
-        // =========================
-        // OBTENER POR ID
-        // =========================
-
         public async Task<Alojamiento?>
             ObtenerPorId(int id)
         {
             return await _repository
                 .ObtenerPorId(id);
         }
-
-        // =========================
-        // CREAR
-        // =========================
 
         public async Task Crear(
             Alojamiento alojamiento)
@@ -48,10 +38,6 @@ namespace FondoXYZ.Services.Implementations
                 .Crear(alojamiento);
         }
 
-        // =========================
-        // ACTUALIZAR
-        // =========================
-
         public async Task Actualizar(
             Alojamiento alojamiento)
         {
@@ -59,14 +45,12 @@ namespace FondoXYZ.Services.Implementations
                 .Actualizar(alojamiento);
         }
 
-        // =========================
-        // ELIMINAR
-        // =========================
-
         public async Task Eliminar(int id)
         {
             await _repository
                 .Eliminar(id);
         }
+
+        #endregion
     }
 }

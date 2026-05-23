@@ -1,5 +1,6 @@
 ﻿using FondoXYZ.Entities.DTOs;
 using FondoXYZ.Services.Interfaces;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +16,7 @@ namespace FondoXYZ.Web.Controllers
             _authService = authService;
         }
 
-        // =========================
-        // LOGIN
-        // =========================
+        #region Login
 
         [HttpGet]
         [AllowAnonymous]
@@ -52,9 +51,9 @@ namespace FondoXYZ.Web.Controllers
                 "Home");
         }
 
-        // =========================
-        // REGISTER
-        // =========================
+        #endregion
+
+        #region Register
 
         [HttpGet]
         [AllowAnonymous]
@@ -88,9 +87,9 @@ namespace FondoXYZ.Web.Controllers
                 "Login");
         }
 
-        // =========================
-        // LOGOUT
-        // =========================
+        #endregion
+
+        #region Logout
 
         [Authorize]
         [HttpPost]
@@ -103,9 +102,9 @@ namespace FondoXYZ.Web.Controllers
                 "Login");
         }
 
-        // =========================
-        // FORGOT PASSWORD
-        // =========================
+        #endregion
+
+        #region Password Recovery
 
         [HttpGet]
         [AllowAnonymous]
@@ -131,10 +130,6 @@ namespace FondoXYZ.Web.Controllers
 
             return View();
         }
-
-        // =========================
-        // RESET PASSWORD
-        // =========================
 
         [HttpGet]
         [AllowAnonymous]
@@ -177,14 +172,15 @@ namespace FondoXYZ.Web.Controllers
                 "Login");
         }
 
-        // =========================
-        // ACCESS DENIED
-        // =========================
+        #endregion
+
+        #region Access Denied
 
         public IActionResult AccessDenied()
         {
             return View();
         }
 
+        #endregion
     }
 }

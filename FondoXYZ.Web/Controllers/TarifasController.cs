@@ -1,5 +1,6 @@
 ﻿using FondoXYZ.Entities;
 using FondoXYZ.Services.Interfaces;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -9,9 +10,11 @@ namespace FondoXYZ.Web.Controllers
     {
         private readonly ITarifaService _service;
 
-        private readonly IAlojamientoService _alojamientoService;
+        private readonly IAlojamientoService
+            _alojamientoService;
 
-        private readonly ITemporadaService _temporadaService;
+        private readonly ITemporadaService
+            _temporadaService;
 
         public TarifasController(
             ITarifaService service,
@@ -27,9 +30,7 @@ namespace FondoXYZ.Web.Controllers
                 temporadaService;
         }
 
-        // =========================
-        // LISTAR
-        // =========================
+        #region Listado
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -40,9 +41,9 @@ namespace FondoXYZ.Web.Controllers
             return View(tarifas);
         }
 
-        // =========================
-        // CREAR GET
-        // =========================
+        #endregion
+
+        #region Create
 
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -52,11 +53,8 @@ namespace FondoXYZ.Web.Controllers
             return View();
         }
 
-        // =========================
-        // CREAR POST
-        // =========================
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             Tarifa tarifa)
         {
@@ -88,9 +86,9 @@ namespace FondoXYZ.Web.Controllers
             }
         }
 
-        // =========================
-        // EDITAR GET
-        // =========================
+        #endregion
+
+        #region Edit
 
         [HttpGet]
         public async Task<IActionResult> Edit(
@@ -109,11 +107,8 @@ namespace FondoXYZ.Web.Controllers
             return View(tarifa);
         }
 
-        // =========================
-        // EDITAR POST
-        // =========================
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             Tarifa tarifa)
         {
@@ -146,11 +141,12 @@ namespace FondoXYZ.Web.Controllers
             }
         }
 
-        // =========================
-        // ELIMINAR
-        // =========================
+        #endregion
+
+        #region Delete
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(
             int id)
         {
@@ -162,9 +158,9 @@ namespace FondoXYZ.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // COMBOS
-        // =========================
+        #endregion
+
+        #region Helpers
 
         private async Task CargarCombos()
         {
@@ -188,5 +184,7 @@ namespace FondoXYZ.Web.Controllers
                     "IdTemporada",
                     "Nombre");
         }
+
+        #endregion
     }
 }

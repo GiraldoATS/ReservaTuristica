@@ -1,10 +1,13 @@
 using FondoXYZ.Data;
 using FondoXYZ.Entities;
 using FondoXYZ.Entities.Configurations;
+
 using FondoXYZ.Repositories.Implementations;
 using FondoXYZ.Repositories.Interfaces;
+
 using FondoXYZ.Services.Implementations;
 using FondoXYZ.Services.Interfaces;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -12,9 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =========================
-// CONNECTION STRING
-// =========================
+#region Connection String
 
 var connectionString =
     builder.Configuration
@@ -22,9 +23,9 @@ var connectionString =
     ?? throw new InvalidOperationException(
         "Connection string 'DefaultConnection' not found.");
 
-// =========================
-// DB CONTEXT
-// =========================
+#endregion
+
+#region Database
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     options =>
@@ -33,32 +34,24 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 builder.Services
     .AddDatabaseDeveloperPageExceptionFilter();
 
-// =========================
-// EMAIL SETTINGS
-// =========================
+#endregion
+
+#region Email Settings
 
 builder.Services.Configure<EmailSettings>(
     builder.Configuration
         .GetSection("EmailSettings"));
 
-// =========================
-// IDENTITY
-// =========================
+#endregion
+
+#region Identity
 
 builder.Services.AddIdentity<
     ApplicationUser,
     IdentityRole>(options =>
     {
-        // =========================
-        // SIGN IN
-        // =========================
-
         options.SignIn.RequireConfirmedAccount =
             false;
-
-        // =========================
-        // PASSWORD
-        // =========================
 
         options.Password.RequireDigit =
             false;
@@ -78,26 +71,18 @@ builder.Services.AddIdentity<
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// =========================
-// COOKIE LOGIN
-// =========================
+#endregion
+
+#region Cookies
 
 builder.Services.ConfigureApplicationCookie(
     options =>
     {
-        // =========================
-        // RUTAS
-        // =========================
-
         options.LoginPath =
             "/Account/Login";
 
         options.AccessDeniedPath =
             "/Account/AccessDenied";
-
-        // =========================
-        // COOKIE
-        // =========================
 
         options.Cookie.Name =
             "FondoXYZAuth";
@@ -108,19 +93,11 @@ builder.Services.ConfigureApplicationCookie(
         options.Cookie.IsEssential =
             true;
 
-        // =========================
-        // TIEMPO
-        // =========================
-
         options.ExpireTimeSpan =
             TimeSpan.FromHours(8);
 
         options.SlidingExpiration =
             true;
-
-        // =========================
-        // REDIRECCION
-        // =========================
 
         options.Events.OnRedirectToAccessDenied =
             context =>
@@ -132,9 +109,9 @@ builder.Services.ConfigureApplicationCookie(
             };
     });
 
-// =========================
-// MVC + GLOBAL AUTH
-// =========================
+#endregion
+
+#region MVC
 
 builder.Services
     .AddControllersWithViews(options =>
@@ -150,9 +127,9 @@ builder.Services
 
 builder.Services.AddRazorPages();
 
-// =========================
-// REPOSITORIES
-// =========================
+#endregion
+
+#region Repositories
 
 builder.Services.AddScoped<
     IReservaRepository,
@@ -178,9 +155,9 @@ builder.Services.AddScoped<
     ISedeRepository,
     SedeRepository>();
 
-// =========================
-// SERVICES
-// =========================
+#endregion
+
+#region Services
 
 builder.Services.AddScoped<
     IReservaService,
@@ -214,15 +191,15 @@ builder.Services.AddScoped<
     ISedeService,
     SedeService>();
 
-// =========================
-// BUILD
-// =========================
+#endregion
+
+#region Build
 
 var app = builder.Build();
 
-// =========================
-// MIDDLEWARE
-// =========================
+#endregion
+
+#region Middleware
 
 if (app.Environment.IsDevelopment())
 {
@@ -242,17 +219,17 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// =========================
-// AUTHENTICATION
-// =========================
+#endregion
+
+#region Authentication
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
-// =========================
-// ROUTES
-// =========================
+#endregion
+
+#region Routes
 
 app.MapControllerRoute(
     name: "default",
@@ -261,8 +238,10 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
-// =========================
-// RUN
-// =========================
+#endregion
+
+#region Run
 
 app.Run();
+
+#endregion

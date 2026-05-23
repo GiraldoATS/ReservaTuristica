@@ -1,6 +1,7 @@
 ﻿using FondoXYZ.Entities;
 using FondoXYZ.Entities.DTOs;
 using FondoXYZ.Services.Interfaces;
+
 using Microsoft.AspNetCore.Identity;
 
 namespace FondoXYZ.Services.Implementations
@@ -27,42 +28,35 @@ namespace FondoXYZ.Services.Implementations
 
             _emailService = emailService;
         }
-        // =========================
-        // LOGIN
-        // =========================
+
+        #region Authentication
+
         public async Task<bool> LoginAsync(LoginDto dto)
         {
-            // LIMPIAR SESIONES ANTERIORES
             await _signInManager.SignOutAsync();
 
-            var user =
-                await _userManager
-                    .FindByEmailAsync(dto.Email);
+            var user = await _userManager
+                .FindByEmailAsync(dto.Email);
 
             if (user == null)
                 return false;
 
-            var result =
-                await _signInManager
-                    .PasswordSignInAsync(
-                        user.UserName!,
-                        dto.Password,
-                        dto.RememberMe,
-                        lockoutOnFailure: false);
+            var result = await _signInManager
+                .PasswordSignInAsync(
+                    user.UserName!,
+                    dto.Password,
+                    dto.RememberMe,
+                    lockoutOnFailure: false);
 
             return result.Succeeded;
         }
-        // =========================
-        // REGISTER
-        // =========================
 
         public async Task<
             (bool Success, string ErrorMessage)>
             RegisterAsync(RegisterDto dto)
         {
-            var existingUser =
-                await _userManager
-                    .FindByEmailAsync(dto.Email);
+            var existingUser = await _userManager
+                .FindByEmailAsync(dto.Email);
 
             if (existingUser != null)
             {
@@ -78,19 +72,17 @@ namespace FondoXYZ.Services.Implementations
                 NombreCompleto = dto.NombreCompleto
             };
 
-            var result =
-                await _userManager
-                    .CreateAsync(
-                        user,
-                        dto.Password);
+            var result = await _userManager
+                .CreateAsync(
+                    user,
+                    dto.Password);
 
             if (!result.Succeeded)
             {
-                var errors =
-                    string.Join(
-                        ", ",
-                        result.Errors
-                            .Select(x => x.Description));
+                var errors = string.Join(
+                    ", ",
+                    result.Errors
+                        .Select(x => x.Description));
 
                 return (false, errors);
             }
@@ -98,37 +90,31 @@ namespace FondoXYZ.Services.Implementations
             return (true, string.Empty);
         }
 
-        // =========================
-        // LOGOUT
-        // =========================
-
         public async Task LogoutAsync()
         {
             await _signInManager.SignOutAsync();
         }
 
-        // =========================
-        // FORGOT PASSWORD
-        // =========================
+        #endregion
+
+        #region Password Recovery
 
         public async Task ForgotPasswordAsync(
             string email)
         {
-            var user =
-                await _userManager
-                    .FindByEmailAsync(email);
+            var user = await _userManager
+                .FindByEmailAsync(email);
 
             if (user == null)
                 return;
 
-            var token =
-                await _userManager
-                    .GeneratePasswordResetTokenAsync(user);
+            var token = await _userManager
+                .GeneratePasswordResetTokenAsync(user);
 
             token = Uri.EscapeDataString(token);
 
             var link =
-                 $"https://localhost:7155/Account/ResetPassword?email={email}&token={token}";
+                $"https://localhost:7155/Account/ResetPassword?email={email}&token={token}";
 
             var body = $@"
 <!DOCTYPE html>
@@ -140,23 +126,21 @@ namespace FondoXYZ.Services.Implementations
 <body style='margin:0; padding:40px 0; background-color:#f9f9f9; font-family:-apple-system,BlinkMacSystemFont,""Segoe UI"",Roboto,Helvetica,Arial,sans-serif;'>
 
     <table width='100%' border='0' cellpadding='0' cellspacing='0' style='max-width:540px; margin:0 auto; background:#ffffff; border-radius:12px; border:1px solid #ededed; overflow:hidden;'>
-        
-        <!-- CONTENIDO -->
+
         <tr>
             <td style='padding:48px 40px 32px 40px;'>
-                <h1 style='margin:0 0 24px 0; font-size:22px; font-weight:700; color:#111111; letter-spacing:-0.5px;'>
+                <h1 style='margin:0 0 24px 0; font-size:22px; font-weight:700; color:#111111;'>
                     FondoXYZ
                 </h1>
-                
+
                 <p style='margin:0 0 16px 0; font-size:15px; line-height:24px; color:#444444;'>
                     Recibimos una solicitud para restablecer la contraseña de tu cuenta.
                 </p>
-                
+
                 <p style='margin:0 0 32px 0; font-size:15px; line-height:24px; color:#444444;'>
-                    Haz clic en el botón de abajo para configurar una nueva credencial:
+                    Haz clic en el botón de abajo para configurar una nueva credencial.
                 </p>
 
-                <!-- BOTÓN -->
                 <table border='0' cellpadding='0' cellspacing='0' style='margin:32px 0;'>
                     <tr>
                         <td align='center' bgcolor='#111111' style='border-radius:6px;'>
@@ -168,12 +152,11 @@ namespace FondoXYZ.Services.Implementations
                 </table>
 
                 <p style='margin:32px 0 0 0; font-size:13px; line-height:20px; color:#888888;'>
-                    Si no solicitaste este movimiento, puedes ignorar este mensaje con total tranquilidad.
+                    Si no solicitaste este movimiento, puedes ignorar este mensaje.
                 </p>
             </td>
         </tr>
 
-        <!-- FOOTER -->
         <tr>
             <td style='padding:0 40px 40px 40px; font-size:12px; color:#aaaaaa;'>
                 <hr style='border:0; border-top:1px solid #ededed; margin:0 0 20px 0;'>
@@ -193,18 +176,13 @@ namespace FondoXYZ.Services.Implementations
                 body);
         }
 
-        // =========================
-        // RESET PASSWORD
-        // =========================
-
         public async Task<
-    (bool Success, string ErrorMessage)>
-    ResetPasswordAsync(
-        ResetPasswordDto dto)
+            (bool Success, string ErrorMessage)>
+            ResetPasswordAsync(
+                ResetPasswordDto dto)
         {
-            var user =
-                await _userManager
-                    .FindByEmailAsync(dto.Email);
+            var user = await _userManager
+                .FindByEmailAsync(dto.Email);
 
             if (user == null)
             {
@@ -216,25 +194,25 @@ namespace FondoXYZ.Services.Implementations
             var decodedToken =
                 Uri.UnescapeDataString(dto.Token);
 
-            var result =
-                await _userManager
-                    .ResetPasswordAsync(
-                        user,
-                        decodedToken,
-                        dto.Password);
+            var result = await _userManager
+                .ResetPasswordAsync(
+                    user,
+                    decodedToken,
+                    dto.Password);
 
             if (!result.Succeeded)
             {
-                var errors =
-                    string.Join(
-                        ", ",
-                        result.Errors
-                            .Select(x => x.Description));
+                var errors = string.Join(
+                    ", ",
+                    result.Errors
+                        .Select(x => x.Description));
 
                 return (false, errors);
             }
 
             return (true, string.Empty);
         }
+
+        #endregion
     }
 }

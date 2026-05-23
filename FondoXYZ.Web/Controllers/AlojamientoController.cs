@@ -1,5 +1,6 @@
 ﻿using FondoXYZ.Entities;
 using FondoXYZ.Services.Interfaces;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -8,6 +9,7 @@ namespace FondoXYZ.Web.Controllers
     public class AlojamientoController : Controller
     {
         private readonly IAlojamientoService _service;
+
         private readonly ISedeService _sedeService;
 
         public AlojamientoController(
@@ -15,12 +17,11 @@ namespace FondoXYZ.Web.Controllers
             ISedeService sedeService)
         {
             _service = service;
+
             _sedeService = sedeService;
         }
 
-        // =========================
-        // LISTADO
-        // =========================
+        #region Listado
 
         public async Task<IActionResult> Index()
         {
@@ -30,9 +31,9 @@ namespace FondoXYZ.Web.Controllers
             return View(alojamientos);
         }
 
-        // =========================
-        // CREATE GET
-        // =========================
+        #endregion
+
+        #region Create
 
         public async Task<IActionResult> Create()
         {
@@ -40,10 +41,6 @@ namespace FondoXYZ.Web.Controllers
 
             return View();
         }
-
-        // =========================
-        // CREATE POST
-        // =========================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -57,7 +54,6 @@ namespace FondoXYZ.Web.Controllers
                 return View(model);
             }
 
-            // SIEMPRE ACTIVO AL CREAR
             model.Estado = true;
 
             await _service.Crear(model);
@@ -65,9 +61,9 @@ namespace FondoXYZ.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // EDIT GET
-        // =========================
+        #endregion
+
+        #region Edit
 
         public async Task<IActionResult> Edit(int id)
         {
@@ -83,10 +79,6 @@ namespace FondoXYZ.Web.Controllers
 
             return View(alojamiento);
         }
-
-        // =========================
-        // EDIT POST
-        // =========================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -105,9 +97,9 @@ namespace FondoXYZ.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // DELETE
-        // =========================
+        #endregion
+
+        #region Delete
 
         public async Task<IActionResult> Delete(int id)
         {
@@ -116,9 +108,9 @@ namespace FondoXYZ.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // CARGAR SEDES
-        // =========================
+        #endregion
+
+        #region Helpers
 
         private async Task CargarSedes()
         {
@@ -130,5 +122,7 @@ namespace FondoXYZ.Web.Controllers
                 "IdSede",
                 "Nombre");
         }
+
+        #endregion
     }
 }

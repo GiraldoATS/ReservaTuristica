@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using FondoXYZ.Data;
@@ -24,9 +23,7 @@ namespace FondoXYZ.Repositories.Implementations
             _context = context;
         }
 
-        // =========================
-        // OBTENER RESERVAS
-        // =========================
+        #region Reservas
 
         public async Task<List<Reserva>> ObtenerReservas()
         {
@@ -35,20 +32,12 @@ namespace FondoXYZ.Repositories.Implementations
                 .ToListAsync();
         }
 
-        // =========================
-        // OBTENER RESERVA POR ID
-        // =========================
-
         public async Task<Reserva?> ObtenerPorId(int id)
         {
             return await _context.Reservas
                 .FirstOrDefaultAsync(x =>
                     x.IdReserva == id);
         }
-
-        // =========================
-        // CREAR RESERVA
-        // =========================
 
         public async Task CrearReserva(
             Reserva reserva)
@@ -59,12 +48,37 @@ namespace FondoXYZ.Repositories.Implementations
             await _context.SaveChangesAsync();
         }
 
+        public async Task ActualizarReserva(
+            Reserva reserva)
+        {
+            _context.Reservas
+                .Update(reserva);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task EliminarReserva(int id)
+        {
+            var reserva = await ObtenerPorId(id);
+
+            if (reserva != null)
+            {
+                _context.Reservas
+                    .Remove(reserva);
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        #endregion
+
+        #region Validaciones
 
         public async Task<bool> ExisteCruceReserva(
-         int idAlojamiento,
-         DateTime fechaInicio,
-         DateTime fechaFin)
-            {
+            int idAlojamiento,
+            DateTime fechaInicio,
+            DateTime fechaFin)
+        {
             return await _context.Reservas.AnyAsync(r =>
 
                 r.IdAlojamiento == idAlojamiento
@@ -78,40 +92,10 @@ namespace FondoXYZ.Repositories.Implementations
                 )
             );
         }
-        // =========================
-        // ACTUALIZAR RESERVA
-        // =========================
 
-        public async Task ActualizarReserva(
-            Reserva reserva)
-        {
-            _context.Reservas
-                .Update(reserva);
+        #endregion
 
-            await _context.SaveChangesAsync();
-        }
-
-        // =========================
-        // ELIMINAR RESERVA
-        // =========================
-
-        public async Task EliminarReserva(int id)
-        {
-            var reserva =
-                await ObtenerPorId(id);
-
-            if (reserva != null)
-            {
-                _context.Reservas
-                    .Remove(reserva);
-
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        // =========================
-        // CONSULTAR DISPONIBILIDAD
-        // =========================
+        #region Stored Procedures
 
         public async Task<List<DisponibilidadDto>>
             ConsultarDisponibilidad(
@@ -129,7 +113,7 @@ namespace FondoXYZ.Repositories.Implementations
                     fechaFin)
             };
 
-            var resultado = await _context
+            return await _context
                 .Disponibilidades
                 .FromSqlRaw(
                     @"EXEC sp_ConsultarDisponibilidad
@@ -137,13 +121,7 @@ namespace FondoXYZ.Repositories.Implementations
                         @FechaFin",
                     parametros)
                 .ToListAsync();
-
-            return resultado;
         }
-
-        // =========================
-        // CALCULAR TARIFA
-        // =========================
 
         public async Task<CalculoTarifaDto>
             CalcularTarifa(
@@ -185,5 +163,7 @@ namespace FondoXYZ.Repositories.Implementations
             return resultado.FirstOrDefault()
                 ?? new CalculoTarifaDto();
         }
+
+        #endregion
     }
 }

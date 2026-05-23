@@ -1,5 +1,6 @@
 ﻿using FondoXYZ.Entities;
 using FondoXYZ.Services.Interfaces;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace FondoXYZ.Web.Controllers
@@ -14,7 +15,8 @@ namespace FondoXYZ.Web.Controllers
             _service = service;
         }
 
-        // LISTADO
+        #region Listado
+
         public async Task<IActionResult> Index()
         {
             var sedes =
@@ -23,14 +25,17 @@ namespace FondoXYZ.Web.Controllers
             return View(sedes);
         }
 
-        // CREATE GET
+        #endregion
+
+        #region Create
+
         public IActionResult Create()
         {
             return View();
         }
 
-        // CREATE POST
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             Sede model)
         {
@@ -41,5 +46,7 @@ namespace FondoXYZ.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        #endregion
     }
 }

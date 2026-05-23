@@ -31,10 +31,7 @@ namespace FondoXYZ.Entities
         public DateTime FechaReserva { get; set; }
             = DateTime.Now;
 
-        // =========================
-        // RELACIONES
-        // =========================
-
+        //Relaciones
         public Alojamiento? Alojamiento { get; set; }
 
         public ApplicationUser? Usuario { get; set; }
