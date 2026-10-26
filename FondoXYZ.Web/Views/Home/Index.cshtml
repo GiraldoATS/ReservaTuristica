@@ -1,8 +1,46 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
+    var nombre = User.FindFirst(ClaimsPersonalizados.NombreCompleto)?.Value ?? User.Identity?.Name;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="mb-4">
+    <h2>Bienvenido, @nombre</h2>
+    <p class="text-muted">Gestiona tus reservas en las sedes de FondoXYZ.</p>
+</div>
+
+<div class="row">
+
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5>Nueva reserva</h5>
+                <p class="text-muted">Consulta los alojamientos disponibles para tus fechas.</p>
+                <a asp-controller="Reservas" asp-action="Disponibilidad" class="btn btn-primary">Consultar disponibilidad</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5>Reservas</h5>
+                <p class="text-muted">Revisa el listado de reservas registradas.</p>
+                <a asp-controller="Reservas" asp-action="Index" class="btn btn-outline-primary">Ver reservas</a>
+            </div>
+        </div>
+    </div>
+
+    @if (User.IsInRole(Roles.Admin))
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5>Administración</h5>
+                    <p class="text-muted">Indicadores, tarifas, alojamientos y sedes.</p>
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">Ir al dashboard</a>
+                </div>
+            </div>
+        </div>
+    }
+
 </div>
