@@ -1,8 +1,10 @@
-﻿@model FondoXYZ.Entities.Alojamiento
+﻿@model AlojamientoFormViewModel
 
 <h2>Nuevo Alojamiento</h2>
 
-<form asp-action="Create">
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="Create" method="post">
 
     <div class="mb-3">
         <label>Nombre</label>
@@ -24,6 +26,7 @@
         <select asp-for="IdSede"
                 asp-items="ViewBag.Sedes"
                 class="form-select">
+            <option value="">Seleccione</option>
         </select>
     </div>
 
@@ -54,4 +57,13 @@
         Guardar
     </button>
 
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Volver
+    </a>
+
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

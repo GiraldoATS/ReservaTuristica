@@ -1,190 +1,122 @@
-﻿using FondoXYZ.Entities;
-using FondoXYZ.Services.Interfaces;
-
+﻿using FondoXYZ.Application.Common;
+using FondoXYZ.Application.Ports.In;
+using FondoXYZ.Domain.Exceptions;
+using FondoXYZ.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace FondoXYZ.Web.Controllers
+namespace FondoXYZ.Web.Controllers;
+
+[Authorize(Roles = Roles.Admin)]
+public class TarifasController : Controller
 {
-    public class TarifasController : Controller
+    private readonly ITarifaService _tarifaService;
+    private readonly IAlojamientoService _alojamientoService;
+    private readonly ITemporadaService _temporadaService;
+
+    public TarifasController(
+        ITarifaService tarifaService,
+        IAlojamientoService alojamientoService,
+        ITemporadaService temporadaService)
     {
-        private readonly ITarifaService _service;
+        _tarifaService = tarifaService;
+        _alojamientoService = alojamientoService;
+        _temporadaService = temporadaService;
+    }
 
-        private readonly IAlojamientoService
-            _alojamientoService;
+    [HttpGet]
+    public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
+        View(await _tarifaService.ObtenerTodasAsync(cancellationToken));
 
-        private readonly ITemporadaService
-            _temporadaService;
+    [HttpGet]
+    public async Task<IActionResult> Create(CancellationToken cancellationToken)
+    {
+        await CargarCombosAsync(cancellationToken);
+        return View(new TarifaFormViewModel());
+    }
 
-        public TarifasController(
-            ITarifaService service,
-            IAlojamientoService alojamientoService,
-            ITemporadaService temporadaService)
-        {
-            _service = service;
-
-            _alojamientoService =
-                alojamientoService;
-
-            _temporadaService =
-                temporadaService;
-        }
-
-        #region Listado
-
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            var tarifas =
-                await _service.ObtenerTarifas();
-
-            return View(tarifas);
-        }
-
-        #endregion
-
-        #region Create
-
-        [HttpGet]
-        public async Task<IActionResult> Create()
-        {
-            await CargarCombos();
-
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            Tarifa tarifa)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(TarifaFormViewModel model, CancellationToken cancellationToken)
+    {
+        if (ModelState.IsValid)
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    await CargarCombos();
+                await _tarifaService.CrearAsync(model.ToCrearCommand(), cancellationToken);
 
-                    return View(tarifa);
-                }
-
-                await _service.CrearTarifa(tarifa);
-
-                TempData["success"] =
-                    "Tarifa creada correctamente";
-
+                TempData["success"] = "Tarifa creada correctamente";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (DomainException ex)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    ex.Message);
-
-                await CargarCombos();
-
-                return View(tarifa);
+                ModelState.AddModelError(string.Empty, ex.Message);
             }
         }
 
-        #endregion
+        await CargarCombosAsync(cancellationToken);
+        return View(model);
+    }
 
-        #region Edit
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
+    {
+        var tarifa = await _tarifaService.ObtenerPorIdAsync(id, cancellationToken);
 
-        [HttpGet]
-        public async Task<IActionResult> Edit(
-            int id)
-        {
-            var tarifa =
-                await _service.ObtenerPorId(id);
+        if (tarifa is null)
+            return NotFound();
 
-            if (tarifa == null)
-            {
-                return NotFound();
-            }
+        await CargarCombosAsync(cancellationToken);
+        return View(TarifaFormViewModel.FromDto(tarifa));
+    }
 
-            await CargarCombos();
-
-            return View(tarifa);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            Tarifa tarifa)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(TarifaFormViewModel model, CancellationToken cancellationToken)
+    {
+        if (ModelState.IsValid)
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    await CargarCombos();
+                await _tarifaService.ActualizarAsync(model.ToActualizarCommand(), cancellationToken);
 
-                    return View(tarifa);
-                }
-
-                await _service
-                    .ActualizarTarifa(tarifa);
-
-                TempData["success"] =
-                    "Tarifa actualizada correctamente";
-
+                TempData["success"] = "Tarifa actualizada correctamente";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (DomainException ex)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    ex.Message);
-
-                await CargarCombos();
-
-                return View(tarifa);
+                ModelState.AddModelError(string.Empty, ex.Message);
             }
         }
 
-        #endregion
+        await CargarCombosAsync(cancellationToken);
+        return View(model);
+    }
 
-        #region Delete
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(
-            int id)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        try
         {
-            await _service.EliminarTarifa(id);
-
-            TempData["success"] =
-                "Tarifa eliminada correctamente";
-
-            return RedirectToAction(nameof(Index));
+            await _tarifaService.EliminarAsync(id, cancellationToken);
+            TempData["success"] = "Tarifa eliminada correctamente";
+        }
+        catch (DomainException ex)
+        {
+            TempData["error"] = ex.Message;
         }
 
-        #endregion
+        return RedirectToAction(nameof(Index));
+    }
 
-        #region Helpers
+    private async Task CargarCombosAsync(CancellationToken cancellationToken)
+    {
+        var alojamientos = await _alojamientoService.ObtenerTodosAsync(cancellationToken);
+        var temporadas = await _temporadaService.ObtenerTodasAsync(cancellationToken);
 
-        private async Task CargarCombos()
-        {
-            var alojamientos =
-                await _alojamientoService
-                    .ObtenerAlojamientos();
-
-            var temporadas =
-                await _temporadaService
-                    .ObtenerTemporadas();
-
-            ViewBag.Alojamientos =
-                new SelectList(
-                    alojamientos,
-                    "IdAlojamiento",
-                    "Nombre");
-
-            ViewBag.Temporadas =
-                new SelectList(
-                    temporadas,
-                    "IdTemporada",
-                    "Nombre");
-        }
-
-        #endregion
+        ViewBag.Alojamientos = new SelectList(alojamientos, "IdAlojamiento", "Nombre");
+        ViewBag.Temporadas = new SelectList(temporadas, "IdTemporada", "Nombre");
     }
 }

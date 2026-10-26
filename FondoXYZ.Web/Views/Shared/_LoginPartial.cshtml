@@ -1,29 +1,19 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using FondoXYZ.Entities
-
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
-
-@{
-    ApplicationUser? currentUser = null;
-
-    if (SignInManager.IsSignedIn(User))
-    {
-        currentUser =
-            await UserManager.GetUserAsync(User);
-    }
+﻿@{
+    // El nombre viaja como claim en la cookie (ver ApplicationUserClaimsPrincipalFactory),
+    // así no se consulta la base de datos en cada request.
+    var nombre = User.FindFirst(ClaimsPersonalizados.NombreCompleto)?.Value ?? User.Identity?.Name;
 }
 
 <ul class="navbar-nav">
 
-    @if (SignInManager.IsSignedIn(User))
+    @if (User.Identity?.IsAuthenticated == true)
     {
         <li class="nav-item">
 
             <span class="nav-link text-dark fw-semibold">
 
                 Hola
-                @currentUser?.NombreCompleto
+                @nombre
 
             </span>
 

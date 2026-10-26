@@ -1,30 +1,20 @@
-﻿using FondoXYZ.Services.Interfaces;
+﻿using FondoXYZ.Application.Common;
+using FondoXYZ.Application.Ports.In;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FondoXYZ.Web.Controllers
+namespace FondoXYZ.Web.Controllers;
+
+[Authorize(Roles = Roles.Admin)]
+public class DashboardController : Controller
 {
-    [Authorize(Roles = "Admin")]
-    public class DashboardController
-        : Controller
+    private readonly IDashboardService _dashboardService;
+
+    public DashboardController(IDashboardService dashboardService)
     {
-        private readonly IDashboardService
-            _service;
-
-        public DashboardController(
-            IDashboardService service)
-        {
-            _service = service;
-        }
-
-        public async Task<IActionResult>
-            Index()
-        {
-            var dashboard =
-                await _service
-                    .ObtenerDashboard();
-
-            return View(dashboard);
-        }
+        _dashboardService = dashboardService;
     }
+
+    public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
+        View(await _dashboardService.ObtenerAsync(cancellationToken));
 }

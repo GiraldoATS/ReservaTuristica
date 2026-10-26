@@ -1,4 +1,4 @@
-﻿@model FondoXYZ.Entities.DTOs.RegisterDto
+﻿@model RegisterViewModel
 
 @{
     ViewData["Title"] = "Registro";
@@ -6,12 +6,7 @@
 
 <h2>Registro Usuario</h2>
 
-@if (ViewBag.Error != null)
-{
-    <div class="alert alert-danger">
-        @ViewBag.Error
-    </div>
-}
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <form asp-action="Register" method="post">
     <div class="mb-3">

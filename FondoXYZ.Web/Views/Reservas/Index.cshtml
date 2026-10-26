@@ -1,17 +1,10 @@
-﻿@model List<FondoXYZ.Entities.Reserva>
+﻿@model IReadOnlyList<ReservaDto>
 
 <h2 class="mb-4">
     Reservas
 </h2>
 
-@if (TempData["success"] != null)
-{
-    <div class="alert alert-success">
-
-        @TempData["success"]
-
-    </div>
-}
+<partial name="_Alertas" />
 
 <div class="mb-3">
 
@@ -65,7 +58,7 @@
                             </td>
 
                             <td>
-                                @item.Alojamiento?.Nombre
+                                @item.Alojamiento
                             </td>
 
                             <td>

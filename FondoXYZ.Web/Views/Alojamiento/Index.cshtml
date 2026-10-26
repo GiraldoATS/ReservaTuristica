@@ -1,6 +1,8 @@
-﻿@model List<FondoXYZ.Entities.Alojamiento>
+﻿@model IReadOnlyList<AlojamientoDto>
 
 <h2>Alojamientos</h2>
+
+<partial name="_Alertas" />
 
 <a asp-action="Create"
    class="btn btn-primary mb-3">
@@ -26,11 +28,11 @@
             <tr>
                 <td>@item.Nombre</td>
                 <td>@item.Tipo</td>
-                <td>@item.Sede?.Nombre</td>
+                <td>@item.Sede</td>
                 <td>@item.CapacidadMaxima</td>
                 <td>@item.CantidadHabitaciones</td>
                 <td>
-                    @(item.Estado ? "Activo" : "Inactivo")
+                    @(item.Activo ? "Activo" : "Inactivo")
                 </td>
 
                 <td>
@@ -40,11 +42,16 @@
                         Editar
                     </a>
 
-                    <a asp-action="Delete"
-                       asp-route-id="@item.IdAlojamiento"
-                       class="btn btn-danger">
-                        Eliminar
-                    </a>
+                    <form asp-action="Delete"
+                          asp-route-id="@item.IdAlojamiento"
+                          method="post"
+                          class="d-inline"
+                          onsubmit="return confirm('¿Eliminar este alojamiento?');">
+                        <button type="submit"
+                                class="btn btn-danger">
+                            Eliminar
+                        </button>
+                    </form>
                 </td>
             </tr>
         }

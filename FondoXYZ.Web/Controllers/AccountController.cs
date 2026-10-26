@@ -1,186 +1,116 @@
-﻿using FondoXYZ.Entities.DTOs;
-using FondoXYZ.Services.Interfaces;
-
+﻿using FondoXYZ.Application.DTOs;
+using FondoXYZ.Application.Ports.In;
+using FondoXYZ.Web.Models.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FondoXYZ.Web.Controllers
+namespace FondoXYZ.Web.Controllers;
+
+[AllowAnonymous]
+public class AccountController : Controller
 {
-    public class AccountController : Controller
+    private readonly IAuthService _authService;
+
+    public AccountController(IAuthService authService)
     {
-        private readonly IAuthService _authService;
-
-        public AccountController(
-            IAuthService authService)
-        {
-            _authService = authService;
-        }
-
-        #region Login
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(
-            LoginDto dto)
-        {
-            if (!ModelState.IsValid)
-                return View(dto);
-
-            var result =
-                await _authService.LoginAsync(dto);
-
-            if (!result)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    "Correo o contraseña incorrectos");
-
-                return View(dto);
-            }
-
-            return RedirectToAction(
-                "Index",
-                "Home");
-        }
-
-        #endregion
-
-        #region Register
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(
-            RegisterDto dto)
-        {
-            if (!ModelState.IsValid)
-                return View(dto);
-
-            var result =
-                await _authService.RegisterAsync(dto);
-
-            if (!result.Success)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    result.ErrorMessage);
-
-                return View(dto);
-            }
-
-            return RedirectToAction(
-                "Login");
-        }
-
-        #endregion
-
-        #region Logout
-
-        [Authorize]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await _authService.LogoutAsync();
-
-            return RedirectToAction(
-                "Login");
-        }
-
-        #endregion
-
-        #region Password Recovery
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult>
-            ForgotPassword(ForgotPasswordDto dto)
-        {
-            if (!ModelState.IsValid)
-                return View(dto);
-
-            await _authService
-                .ForgotPasswordAsync(dto.Email);
-
-            ViewBag.Message =
-                "Si el correo existe se enviará un enlace.";
-
-            return View();
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult ResetPassword(
-            string email,
-            string token)
-        {
-            var dto = new ResetPasswordDto
-            {
-                Email = email,
-                Token = token
-            };
-
-            return View(dto);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult>
-            ResetPassword(ResetPasswordDto dto)
-        {
-            if (!ModelState.IsValid)
-                return View(dto);
-
-            var result =
-                await _authService
-                    .ResetPasswordAsync(dto);
-
-            if (!result.Success)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    result.ErrorMessage);
-
-                return View(dto);
-            }
-
-            return RedirectToAction(
-                "Login");
-        }
-
-        #endregion
-
-        #region Access Denied
-
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
-
-        #endregion
+        _authService = authService;
     }
+
+    [HttpGet]
+    public IActionResult Login() => View();
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var exitoso = await _authService.LoginAsync(
+            new LoginCommand(model.Email, model.Password, model.RememberMe));
+
+        if (!exitoso)
+        {
+            ModelState.AddModelError(string.Empty, "Correo o contraseña incorrectos");
+            return View(model);
+        }
+
+        return RedirectToAction("Index", "Home");
+    }
+
+    [HttpGet]
+    public IActionResult Register() => View();
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(RegisterViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var resultado = await _authService.RegistrarAsync(
+            new RegistrarUsuarioCommand(model.NombreCompleto, model.Email, model.Password));
+
+        if (!resultado.Exitoso)
+        {
+            ModelState.AddModelError(string.Empty, resultado.Error);
+            return View(model);
+        }
+
+        TempData["success"] = "Registro exitoso. Ya puedes iniciar sesión.";
+        return RedirectToAction(nameof(Login));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+        await _authService.LogoutAsync();
+        return RedirectToAction(nameof(Login));
+    }
+
+    [HttpGet]
+    public IActionResult ForgotPassword() => View();
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        // La URL se arma con el host actual, en lugar de quemar "https://localhost:7155".
+        var urlRestablecimiento = Url.Action(nameof(ResetPassword), "Account", values: null, protocol: Request.Scheme)!;
+
+        await _authService.SolicitarRecuperacionPasswordAsync(model.Email, urlRestablecimiento, cancellationToken);
+
+        ViewBag.Message = "Si el correo existe se enviará un enlace.";
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult ResetPassword(string email, string token) =>
+        View(new ResetPasswordViewModel { Email = email, Token = token });
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var resultado = await _authService.RestablecerPasswordAsync(
+            new RestablecerPasswordCommand(model.Email, model.Token, model.Password));
+
+        if (!resultado.Exitoso)
+        {
+            ModelState.AddModelError(string.Empty, resultado.Error);
+            return View(model);
+        }
+
+        TempData["success"] = "Contraseña actualizada. Ya puedes iniciar sesión.";
+        return RedirectToAction(nameof(Login));
+    }
+
+    public IActionResult AccessDenied() => View();
 }

@@ -1,322 +1,133 @@
-﻿using FondoXYZ.Entities;
-using FondoXYZ.Entities.DTOs;
-using FondoXYZ.Entities.ViewModels;
-using FondoXYZ.Services.Interfaces;
-
-using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using FondoXYZ.Application.Ports.In;
+using FondoXYZ.Domain.Exceptions;
+using FondoXYZ.Web.Models.Reservas;
 using Microsoft.AspNetCore.Mvc;
 
-using System.Security.Claims;
+namespace FondoXYZ.Web.Controllers;
 
-namespace FondoXYZ.Web.Controllers
+public class ReservasController : Controller
 {
-    [Authorize]
-    public class ReservasController : Controller
+    private readonly IReservaService _reservaService;
+    private readonly IAlojamientoService _alojamientoService;
+
+    public ReservasController(IReservaService reservaService, IAlojamientoService alojamientoService)
     {
-        private readonly IReservaService _service;
+        _reservaService = reservaService;
+        _alojamientoService = alojamientoService;
+    }
 
-        private readonly IAlojamientoService
-            _alojamientoService;
+    [HttpGet]
+    public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
+        View(await _reservaService.ObtenerTodasAsync(cancellationToken));
 
-        public ReservasController(
-            IReservaService service,
-            IAlojamientoService alojamientoService)
+    [HttpGet]
+    public async Task<IActionResult> Create(int id, CancellationToken cancellationToken)
+    {
+        var model = new ReservaCreateViewModel
         {
-            _service = service;
+            IdAlojamiento = id,
+            FechaInicio = DateTime.Today,
+            FechaFin = DateTime.Today.AddDays(1),
+            NumeroPersonas = 1
+        };
 
-            _alojamientoService =
-                alojamientoService;
-        }
+        if (!await CargarDatosAlojamientoAsync(model, cancellationToken))
+            return NotFound();
 
-        #region Reservas
+        return View(model);
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> Index()
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(ReservaCreateViewModel model, CancellationToken cancellationToken)
+    {
+        if (ModelState.IsValid)
         {
-            var reservas =
-                await _service.ObtenerReservas();
-
-            return View(reservas);
-        }
-
-        #endregion
-
-        #region Create
-
-        [HttpGet]
-        public async Task<IActionResult>
-            Create(int id)
-        {
-            var alojamiento =
-                await _alojamientoService
-                    .ObtenerPorId(id);
-
-            if (alojamiento == null)
+            try
             {
-                return NotFound();
+                var idUsuario = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(idUsuario))
+                    return Challenge();
+
+                await _reservaService.CrearAsync(model.ToCommand(idUsuario), cancellationToken);
+
+                TempData["success"] = "Reserva creada correctamente.";
+                return RedirectToAction(nameof(Index));
             }
+            catch (DomainException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
+        }
 
-            var model =
-                new ReservaCreateViewModel
-                {
-                    IdAlojamiento = id,
+        if (!await CargarDatosAlojamientoAsync(model, cancellationToken))
+            return NotFound();
 
-                    NombreAlojamiento =
-                        alojamiento.Nombre,
+        return View(model);
+    }
 
-                    CapacidadMaxima =
-                        alojamiento.CapacidadMaxima,
+    [HttpGet]
+    public IActionResult Disponibilidad() => View(new DisponibilidadViewModel());
 
-                    FechaInicio =
-                        DateTime.Today,
-
-                    FechaFin =
-                        DateTime.Today.AddDays(1),
-
-                    NumeroPersonas = 1
-                };
-
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Disponibilidad(DisponibilidadViewModel model, CancellationToken cancellationToken)
+    {
+        if (model.FechaInicio is null || model.FechaFin is null)
+        {
+            ModelState.AddModelError(string.Empty, "Debe seleccionar la fecha inicio y la fecha fin.");
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult>
-            Create(
-                ReservaCreateViewModel model)
+        try
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return View(model);
-                }
+            model.Resultados = await _reservaService.ConsultarDisponibilidadAsync(
+                model.FechaInicio.Value,
+                model.FechaFin.Value,
+                cancellationToken);
 
-                var alojamiento =
-                    await _alojamientoService
-                        .ObtenerPorId(
-                            model.IdAlojamiento);
-
-                if (alojamiento == null)
-                {
-                    return NotFound();
-                }
-
-                ValidarReserva(model, alojamiento);
-
-                if (!ModelState.IsValid)
-                {
-                    model.NombreAlojamiento =
-                        alojamiento.Nombre;
-
-                    model.CapacidadMaxima =
-                        alojamiento.CapacidadMaxima;
-
-                    return View(model);
-                }
-
-                var tarifa =
-                    await _service
-                        .CalcularTarifa(
-                            model.IdAlojamiento,
-                            model.NumeroPersonas,
-                            model.FechaInicio,
-                            model.FechaFin);
-
-                var usuarioId =
-                    User.FindFirstValue(
-                        ClaimTypes.NameIdentifier);
-
-                if (string.IsNullOrEmpty(usuarioId))
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        "No se pudo obtener el usuario logueado.");
-
-                    model.NombreAlojamiento =
-                        alojamiento.Nombre;
-
-                    model.CapacidadMaxima =
-                        alojamiento.CapacidadMaxima;
-
-                    return View(model);
-                }
-
-                var reserva = new Reserva
-                {
-                    IdAlojamiento =
-                        model.IdAlojamiento,
-
-                    FechaInicio =
-                        model.FechaInicio,
-
-                    FechaFin =
-                        model.FechaFin,
-
-                    NumeroPersonas =
-                        model.NumeroPersonas,
-
-                    Total =
-                        tarifa.TotalPagar,
-
-                    FechaReserva =
-                        DateTime.Now,
-
-                    IdUsuario =
-                        usuarioId
-                };
-
-                await _service
-                    .CrearReserva(reserva);
-
-                TempData["success"] =
-                    "Reserva creada correctamente.";
-
-                return RedirectToAction(
-                    nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    ex.Message);
-
-                return View(model);
-            }
+            model.Consultado = true;
+        }
+        catch (DomainException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
         }
 
-        #endregion
+        return View(model);
+    }
 
-        #region Disponibilidad
-
-        [HttpGet]
-        public IActionResult Disponibilidad()
+    [HttpPost]
+    public async Task<IActionResult> CalcularTarifa([FromBody] CalcularTarifaRequest request, CancellationToken cancellationToken)
+    {
+        try
         {
-            return View(
-                new List<DisponibilidadDto>());
-        }
+            var resultado = await _reservaService.CalcularTarifaAsync(
+                request.IdAlojamiento,
+                request.NumeroPersonas,
+                request.FechaInicio,
+                request.FechaFin,
+                cancellationToken);
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult>
-            Disponibilidad(
-                DateTime fechaInicio,
-                DateTime fechaFin)
+            return Ok(resultado);
+        }
+        catch (DomainException ex)
         {
-            if (fechaInicio < DateTime.Today)
-            {
-                TempData["error"] =
-                    "La fecha inicio no puede ser menor a hoy.";
-
-                return View(
-                    new List<DisponibilidadDto>());
-            }
-
-            if (fechaFin <= fechaInicio)
-            {
-                TempData["error"] =
-                    "La fecha fin debe ser mayor a la fecha inicio.";
-
-                return View(
-                    new List<DisponibilidadDto>());
-            }
-
-            var resultado =
-                await _service
-                    .ConsultarDisponibilidad(
-                        fechaInicio,
-                        fechaFin);
-
-            return View(resultado);
+            return BadRequest(new { error = ex.Message });
         }
+    }
 
-        #endregion
+    private async Task<bool> CargarDatosAlojamientoAsync(ReservaCreateViewModel model, CancellationToken cancellationToken)
+    {
+        var alojamiento = await _alojamientoService.ObtenerPorIdAsync(model.IdAlojamiento, cancellationToken);
 
-        #region Tarifas
+        if (alojamiento is null)
+            return false;
 
-        [HttpPost]
-        public async Task<JsonResult>
-            CalcularTarifa(
-                [FromBody]
-                CalcularTarifaRequest request)
-        {
-            try
-            {
-                var resultado =
-                    await _service
-                        .CalcularTarifa(
-                            request.IdAlojamiento,
-                            request.NumeroPersonas,
-                            request.FechaInicio,
-                            request.FechaFin);
+        model.NombreAlojamiento = alojamiento.Nombre;
+        model.CapacidadMaxima = alojamiento.CapacidadMaxima;
 
-                return Json(resultado);
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    error = ex.Message
-                });
-            }
-        }
-
-        #endregion
-
-        #region Validaciones
-
-        private async void ValidarReserva(
-            ReservaCreateViewModel model,
-            Alojamiento alojamiento)
-        {
-            if (model.FechaInicio < DateTime.Today)
-            {
-                ModelState.AddModelError(
-                    "FechaInicio",
-                    "La fecha inicio no puede ser menor a hoy.");
-            }
-
-            if (model.FechaFin <= model.FechaInicio)
-            {
-                ModelState.AddModelError(
-                    "FechaFin",
-                    "La fecha fin debe ser mayor a la fecha inicio.");
-            }
-
-            if (model.NumeroPersonas <= 0)
-            {
-                ModelState.AddModelError(
-                    "NumeroPersonas",
-                    "Debe ingresar mínimo 1 persona.");
-            }
-
-            if (model.NumeroPersonas >
-                alojamiento.CapacidadMaxima)
-            {
-                ModelState.AddModelError(
-                    "NumeroPersonas",
-                    $"La capacidad máxima es {alojamiento.CapacidadMaxima}");
-            }
-
-            var disponibles =
-                await _service
-                    .ConsultarDisponibilidad(
-                        model.FechaInicio,
-                        model.FechaFin);
-
-            var alojamientoDisponible =
-                disponibles.Any(x =>
-                    x.IdAlojamiento ==
-                    model.IdAlojamiento);
-
-            if (!alojamientoDisponible)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    "El alojamiento no está disponible para esas fechas.");
-            }
-        }
-
-        #endregion
+        return true;
     }
 }

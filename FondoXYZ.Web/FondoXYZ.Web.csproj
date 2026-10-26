@@ -8,11 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.25" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.27" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.25" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.27" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.27" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.27" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.27">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,10 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FondoXYZ.Data\FondoXYZ.Data.csproj" />
-    <ProjectReference Include="..\FondoXYZ.Entities\FondoXYZ.Entities.csproj" />
-    <ProjectReference Include="..\FondoXYZ.Repositories\FondoXYZ.Repositories.csproj" />
-    <ProjectReference Include="..\FondoXYZ.Services\FondoXYZ.Services.csproj" />
+    <!-- Web es el composition root: conoce Infrastructure solo para registrar sus adaptadores. -->
+    <ProjectReference Include="..\FondoXYZ.Application\FondoXYZ.Application.csproj" />
+    <ProjectReference Include="..\FondoXYZ.Infrastructure\FondoXYZ.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

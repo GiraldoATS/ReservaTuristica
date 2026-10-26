@@ -1,8 +1,10 @@
-﻿@model FondoXYZ.Entities.Alojamiento
+﻿@model AlojamientoFormViewModel
 
 <h2>Editar Alojamiento</h2>
 
-<form asp-action="Edit">
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-action="Edit" method="post">
 
     <input type="hidden"
            asp-for="IdAlojamiento" />
@@ -92,10 +94,10 @@
     <!-- ESTADO -->
     <div class="form-check mb-3">
 
-        <input asp-for="Estado"
+        <input asp-for="Activo"
                class="form-check-input" />
 
-        <label asp-for="Estado"
+        <label asp-for="Activo"
                class="form-check-label">
             Activo
         </label>

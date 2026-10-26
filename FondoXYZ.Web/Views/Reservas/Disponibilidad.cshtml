@@ -1,34 +1,37 @@
-﻿@model List<FondoXYZ.Entities.DTOs.DisponibilidadDto>
+﻿@model DisponibilidadViewModel
 
 <h2>Consultar Disponibilidad</h2>
 
-<form method="post">
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-action="Disponibilidad" method="post">
 
     <div class="row">
 
         <div class="col-md-4">
 
-            <label>Fecha Inicio</label>
+            <label asp-for="FechaInicio" class="form-label">Fecha Inicio</label>
 
-            <input type="date"
-                   name="fechaInicio"
+            <input asp-for="FechaInicio"
+                   type="date"
                    class="form-control" />
 
         </div>
 
         <div class="col-md-4">
 
-            <label>Fecha Fin</label>
+            <label asp-for="FechaFin" class="form-label">Fecha Fin</label>
 
-            <input type="date"
-                   name="fechaFin"
+            <input asp-for="FechaFin"
+                   type="date"
                    class="form-control" />
 
         </div>
 
         <div class="col-md-4 mt-4">
 
-            <button class="btn btn-primary">
+            <button type="submit"
+                    class="btn btn-primary">
                 Consultar
             </button>
 
@@ -40,7 +43,7 @@
 
 <hr />
 
-@if (Model != null && Model.Any())
+@if (Model.Resultados.Any())
 {
     <table class="table table-bordered table-hover">
 
@@ -64,7 +67,7 @@
 
         <tbody>
 
-            @foreach (var item in Model)
+            @foreach (var item in Model.Resultados)
             {
                 <tr>
 
@@ -95,7 +98,7 @@
 
     </table>
 }
-else
+else if (Model.Consultado)
 {
     <div class="alert alert-warning">
 

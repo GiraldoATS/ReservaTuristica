@@ -1,6 +1,8 @@
-﻿@model List<FondoXYZ.Entities.Sede>
+﻿@model IReadOnlyList<SedeDto>
 
 <h2>Sedes</h2>
+
+<partial name="_Alertas" />
 
 <a asp-action="Create"
    class="btn btn-primary mb-3">

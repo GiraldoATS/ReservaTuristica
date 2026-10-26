@@ -1,11 +1,11 @@
-﻿@model FondoXYZ.Entities.Tarifa
+﻿@model TarifaFormViewModel
 
 <h2 class="mb-4">
     Editar Tarifa
 </h2>
 
 <div asp-validation-summary="All"
-     class="alert alert-danger">
+     class="text-danger">
 </div>
 
 <form asp-action="Edit"
@@ -68,7 +68,7 @@
 
             <div class="form-check mb-4">
 
-                <input asp-for="Estado"
+                <input asp-for="Activa"
                        class="form-check-input" />
 
                 <label class="form-check-label">

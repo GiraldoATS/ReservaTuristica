@@ -1,12 +1,12 @@
-﻿@model FondoXYZ.Entities.Tarifa
+﻿@model TarifaFormViewModel
 
 <h2 class="mb-4">
     Nueva Tarifa
 </h2>
 
-@* <div asp-validation-summary="All"
-     class="alert alert-danger">
-</div> *@
+<div asp-validation-summary="All"
+     class="text-danger">
+</div>
 
 <form asp-action="Create"
       method="post">
@@ -75,7 +75,7 @@
 
             <div class="form-check mb-4">
 
-                <input asp-for="Estado"
+                <input asp-for="Activa"
                        class="form-check-input" />
 
                 <label class="form-check-label">

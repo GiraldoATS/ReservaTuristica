@@ -1,0 +1,47 @@
+namespace FondoXYZ.Infrastructure.Notifications;
+
+internal static class PlantillasCorreo
+{
+    public static string RecuperacionPassword(string enlace, int anio) => $"""
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0; padding:40px 0; background-color:#f9f9f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width:540px; margin:0 auto; background:#ffffff; border-radius:12px; border:1px solid #ededed; overflow:hidden;">
+                <tr>
+                    <td style="padding:48px 40px 32px 40px;">
+                        <h1 style="margin:0 0 24px 0; font-size:22px; font-weight:700; color:#111111;">FondoXYZ</h1>
+                        <p style="margin:0 0 16px 0; font-size:15px; line-height:24px; color:#444444;">
+                            Recibimos una solicitud para restablecer la contraseña de tu cuenta.
+                        </p>
+                        <p style="margin:0 0 32px 0; font-size:15px; line-height:24px; color:#444444;">
+                            Haz clic en el botón de abajo para configurar una nueva credencial.
+                        </p>
+                        <table border="0" cellpadding="0" cellspacing="0" style="margin:32px 0;">
+                            <tr>
+                                <td align="center" bgcolor="#111111" style="border-radius:6px;">
+                                    <a href="{enlace}" target="_blank" style="display:inline-block; padding:14px 28px; font-size:14px; font-weight:600; color:#ffffff; text-decoration:none;">
+                                        Restablecer contraseña
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                        <p style="margin:32px 0 0 0; font-size:13px; line-height:20px; color:#888888;">
+                            Si no solicitaste este cambio, puedes ignorar este mensaje.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:0 40px 40px 40px; font-size:12px; color:#aaaaaa;">
+                        <hr style="border:0; border-top:1px solid #ededed; margin:0 0 20px 0;">
+                        © {anio} FondoXYZ. Todos los derechos reservados.
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """;
+}

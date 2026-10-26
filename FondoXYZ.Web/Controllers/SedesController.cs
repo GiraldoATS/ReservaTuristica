@@ -1,52 +1,46 @@
-﻿using FondoXYZ.Entities;
-using FondoXYZ.Services.Interfaces;
-
+﻿using FondoXYZ.Application.Common;
+using FondoXYZ.Application.Ports.In;
+using FondoXYZ.Domain.Exceptions;
+using FondoXYZ.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FondoXYZ.Web.Controllers
+namespace FondoXYZ.Web.Controllers;
+
+[Authorize(Roles = Roles.Admin)]
+public class SedesController : Controller
 {
-    public class SedesController : Controller
+    private readonly ISedeService _sedeService;
+
+    public SedesController(ISedeService sedeService)
     {
-        private readonly ISedeService _service;
+        _sedeService = sedeService;
+    }
 
-        public SedesController(
-            ISedeService service)
+    public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
+        View(await _sedeService.ObtenerTodasAsync(cancellationToken));
+
+    [HttpGet]
+    public IActionResult Create() => View(new SedeFormViewModel());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(SedeFormViewModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        try
         {
-            _service = service;
+            await _sedeService.CrearAsync(model.ToCommand(), cancellationToken);
+        }
+        catch (DomainException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(model);
         }
 
-        #region Listado
-
-        public async Task<IActionResult> Index()
-        {
-            var sedes =
-                await _service.ObtenerSedes();
-
-            return View(sedes);
-        }
-
-        #endregion
-
-        #region Create
-
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            Sede model)
-        {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            await _service.Crear(model);
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        #endregion
+        TempData["success"] = "Sede creada correctamente.";
+        return RedirectToAction(nameof(Index));
     }
 }

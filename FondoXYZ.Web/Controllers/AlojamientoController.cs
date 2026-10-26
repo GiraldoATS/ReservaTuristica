@@ -1,128 +1,118 @@
-﻿using FondoXYZ.Entities;
-using FondoXYZ.Services.Interfaces;
-
+﻿using FondoXYZ.Application.Common;
+using FondoXYZ.Application.Ports.In;
+using FondoXYZ.Domain.Exceptions;
+using FondoXYZ.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace FondoXYZ.Web.Controllers
+namespace FondoXYZ.Web.Controllers;
+
+[Authorize(Roles = Roles.Admin)]
+public class AlojamientoController : Controller
 {
-    public class AlojamientoController : Controller
+    private readonly IAlojamientoService _alojamientoService;
+    private readonly ISedeService _sedeService;
+
+    public AlojamientoController(IAlojamientoService alojamientoService, ISedeService sedeService)
     {
-        private readonly IAlojamientoService _service;
+        _alojamientoService = alojamientoService;
+        _sedeService = sedeService;
+    }
 
-        private readonly ISedeService _sedeService;
+    public async Task<IActionResult> Index(CancellationToken cancellationToken) =>
+        View(await _alojamientoService.ObtenerTodosAsync(cancellationToken));
 
-        public AlojamientoController(
-            IAlojamientoService service,
-            ISedeService sedeService)
+    [HttpGet]
+    public async Task<IActionResult> Create(CancellationToken cancellationToken)
+    {
+        await CargarSedesAsync(cancellationToken);
+        return View(new AlojamientoFormViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(AlojamientoFormViewModel model, CancellationToken cancellationToken)
+    {
+        if (ModelState.IsValid)
         {
-            _service = service;
-
-            _sedeService = sedeService;
-        }
-
-        #region Listado
-
-        public async Task<IActionResult> Index()
-        {
-            var alojamientos =
-                await _service.ObtenerAlojamientos();
-
-            return View(alojamientos);
-        }
-
-        #endregion
-
-        #region Create
-
-        public async Task<IActionResult> Create()
-        {
-            await CargarSedes();
-
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            Alojamiento model)
-        {
-            if (!ModelState.IsValid)
+            try
             {
-                await CargarSedes();
+                await _alojamientoService.CrearAsync(model.ToCrearCommand(), cancellationToken);
 
-                return View(model);
+                TempData["success"] = "Alojamiento creado correctamente.";
+                return RedirectToAction(nameof(Index));
             }
-
-            model.Estado = true;
-
-            await _service.Crear(model);
-
-            return RedirectToAction(nameof(Index));
+            catch (DomainException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
         }
 
-        #endregion
+        await CargarSedesAsync(cancellationToken);
+        return View(model);
+    }
 
-        #region Edit
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
+    {
+        var alojamiento = await _alojamientoService.ObtenerPorIdAsync(id, cancellationToken);
 
-        public async Task<IActionResult> Edit(int id)
+        if (alojamiento is null)
+            return NotFound();
+
+        await CargarSedesAsync(cancellationToken);
+        return View(AlojamientoFormViewModel.FromDto(alojamiento));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(AlojamientoFormViewModel model, CancellationToken cancellationToken)
+    {
+        if (ModelState.IsValid)
         {
-            var alojamiento =
-                await _service.ObtenerPorId(id);
+            try
+            {
+                await _alojamientoService.ActualizarAsync(model.ToActualizarCommand(), cancellationToken);
 
-            if (alojamiento == null)
+                TempData["success"] = "Alojamiento actualizado correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (EntidadNoEncontradaException)
             {
                 return NotFound();
             }
-
-            await CargarSedes();
-
-            return View(alojamiento);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            Alojamiento model)
-        {
-            if (!ModelState.IsValid)
+            catch (DomainException ex)
             {
-                await CargarSedes();
-
-                return View(model);
+                ModelState.AddModelError(string.Empty, ex.Message);
             }
-
-            await _service.Actualizar(model);
-
-            return RedirectToAction(nameof(Index));
         }
 
-        #endregion
+        await CargarSedesAsync(cancellationToken);
+        return View(model);
+    }
 
-        #region Delete
-
-        public async Task<IActionResult> Delete(int id)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        try
         {
-            await _service.Eliminar(id);
-
-            return RedirectToAction(nameof(Index));
+            await _alojamientoService.EliminarAsync(id, cancellationToken);
+            TempData["success"] = "Alojamiento eliminado correctamente.";
         }
-
-        #endregion
-
-        #region Helpers
-
-        private async Task CargarSedes()
+        catch (DomainException ex)
         {
-            var sedes =
-                await _sedeService.ObtenerSedes();
-
-            ViewBag.Sedes = new SelectList(
-                sedes,
-                "IdSede",
-                "Nombre");
+            TempData["error"] = ex.Message;
         }
 
-        #endregion
+        return RedirectToAction(nameof(Index));
+    }
+
+    private async Task CargarSedesAsync(CancellationToken cancellationToken)
+    {
+        var sedes = await _sedeService.ObtenerTodasAsync(cancellationToken);
+
+        ViewBag.Sedes = new SelectList(sedes, "IdSede", "Nombre");
     }
 }
